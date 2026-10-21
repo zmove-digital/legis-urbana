@@ -153,6 +153,13 @@ def health() -> dict[str, Any]:
     return {"status": "ok", "version": APP_VERSION}
 
 
+# Atalho de health check (padrao de orquestradores e probes)
+@app.get("/health", include_in_schema=False)
+@app.get("/healthz", include_in_schema=False)
+def health_alias() -> dict[str, Any]:
+    return health()
+
+
 @app.get("/api/cities")
 def list_cities(db: Session = Depends(get_db)) -> dict[str, Any]:
     cities = db.query(City).order_by(City.name).all()

@@ -148,3 +148,11 @@ def test_api_ciclo_de_vida_de_analise_salva(client):
 def test_api_health_e_pagina(client):
     assert client.get("/api/health").json()["status"] == "ok"
     assert "LegisUrb" in client.get("/").text
+
+
+def test_atalho_de_health_check(client):
+    """Orquestradores costumam sondar /health ou /healthz."""
+    for rota in ("/health", "/healthz"):
+        resposta = client.get(rota)
+        assert resposta.status_code == 200, rota
+        assert resposta.json()["status"] == "ok", rota
