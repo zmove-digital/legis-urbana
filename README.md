@@ -1,5 +1,8 @@
 # LegisUrb
 
+[![CI](https://github.com/zmove-digital/legis-urbana/actions/workflows/ci.yml/badge.svg)](https://github.com/zmove-digital/legis-urbana/actions/workflows/ci.yml)
+[![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-green.svg)](LICENSE)
+
 **Assistente de parâmetros urbanísticos conforme a legislação municipal.**
 
 O engenheiro informa os dados do terreno e do projeto; o sistema devolve os limites
@@ -20,7 +23,7 @@ Hoje o engenheiro que projeta em um município:
 2. Acha a zona do terreno em um mapa georreferenciado.
 3. Encontra o quadro de parâmetros (às vezes em anexo, às vezes em lei municipal).
 4. Interpreta exceções, notas de rodapé, dispensas e regras condicionais.
-5. Descobre no_analysis da análise de viabilidade que errou o recuo lateral.
+5. Descobre na análise de viabilidade que errou o recuo lateral.
 
 O passo 4 é onde estão a maior parte dos erros — e é exatamente o que um sistema
 estruturado resolve: cada regra vira uma condição declarativa com a citação ao lado.
@@ -52,7 +55,7 @@ link para o documento oficial.
 Requisitos: Python 3.11+.
 
 ```bash
-git clone <url-do-repo>
+git clone https://github.com/zmove-digital/legis-urbana.git
 cd legis-urbana
 python -m venv .venv
 .venv\Scripts\activate          # Windows
