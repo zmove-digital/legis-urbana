@@ -81,7 +81,7 @@ Variáveis de ambiente (`cp .env.example .env`):
 ## Testes e lint
 
 ```bash
-pytest          # 35 testes: motor, dados legais e API
+pytest          # 39 testes: motor, dados legais e API
 ruff check .    # lint
 ruff format .   # formatação
 ```
