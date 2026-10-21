@@ -37,6 +37,7 @@ app = FastAPI(
         "Consulta de parametros de ocupacao do solo (CA, TO, recuos, gabarito, permeabilidade) "
         "conforme a legislacao urbanistica do municipio, com indicacao do artigo aplicavel."
     ),
+    lifespan=lifespan,
 )
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
