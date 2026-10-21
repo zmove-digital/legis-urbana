@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    image: legis-urbana:latest
+    ports:
+      - "8000:8000"
+    environment:
+      LEGIS_DB_URL: "sqlite:////app/data/legis.db"
+      LEGIS_DATA_DIR: "/app/data"
+      LEGIS_SEED_ON_STARTUP: "1"
+    volumes:
+      - legis-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  legis-data:

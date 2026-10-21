@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LegisUrb — parâmetros urbanísticos conforme a legislação municipal</title>
+<link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="mark">LU</span>
+    <div>
+      <h1>LegisUrb</h1>
+      <p>Parâmetros de ocupação do solo conforme a legislação do município</p>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <span id="saved-count" class="muted small"></span>
+    <button id="btn-saved" class="btn ghost">Análises salvas</button>
+    <button id="btn-print" class="btn ghost">Imprimir</button>
+  </div>
+</header>
+
+<main class="layout">
+  <!-- ------------------------------------------------------------------ -->
+  <section class="panel form-panel">
+    <h2 class="panel-title">1. Terreno e projeto</h2>
+
+    <div class="field">
+      <label for="city">Município</label>
+      <select id="city"></select>
+      <p class="help" id="city-help"></p>
+    </div>
+
+    <div class="field" id="zone-field">
+      <label for="zone">Zona de zoneamento</label>
+      <select id="zone"><option value="">— selecione —</option></select>
+      <p class="help" id="zone-help"></p>
+      <a class="help-link" id="zone-helper" href="#" target="_blank" rel="noopener" hidden>Consultar mapa de zoneamento ↗</a>
+    </div>
+
+    <div class="field" id="geo-field" hidden>
+      <label for="lat">Latitude</label>
+      <input type="number" step="any" id="lat" placeholder="-23.5500" />
+      <label for="lon">Longitude</label>
+      <input type="number" step="any" id="lon" placeholder="-46.6300" />
+    </div>
+
+    <h2 class="panel-title">2. Questionário do projeto</h2>
+    <div id="questionnaire" class="questions"></div>
+
+    <div class="actions">
+      <button id="btn-analyze" class="btn primary">Consultar regras</button>
+      <button id="btn-save" class="btn">Salvar análise</button>
+      <button id="btn-clear" class="btn ghost">Limpar</button>
+    </div>
+
+    <p class="disclaimer" id="disclaimer"></p>
+  </section>
+
+  <!-- ------------------------------------------------------------------ -->
+  <section class="panel results-panel">
+    <div id="results">
+      <div class="empty">
+        <h3>Nenhuma consulta realizada</h3>
+        <p>Preencha o questionário e clique em <strong>Consultar regras</strong> para obter
+        os parâmetros de ocupação da zona, a verificação do projeto e a base legal de cada item.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="modal" class="modal" hidden>
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Análises salvas</h3>
+      <button id="btn-close-modal" class="btn ghost">Fechar</button>
+    </div>
+    <div id="saved-list" class="saved-list"></div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+slug: cidade-exemplo
+name: Cidade Exemplo
+uf: XX
+is_demo: true
+description: >-
+  Cidade fictícia criada para demonstração e testes do motor. Os números abaixo
+  NÃO vêm de nenhuma lei real e não devem ser usados em projeto. Serve para
+  exercitar os três modos de resolução de zona (manual, questionário e
+  geográfico) e a verificação de permeabilidade.
+
+zone_selection:
+  method: questionnaire
+  hint: "Responda o questionário para o sistema deduzir a zona aplicável."
+  rules:
+    - when: {use: {in: [comercial, servico, institucional]}}
+      zone: ZC
+      priority: 10
+      message: "Uso comercial, de serviço ou institucional: zona central."
+    - when: {use: {eq: industrial}}
+      zone: ZI
+      priority: 10
+      message: "Uso industrial: zona industrial."
+    - when: {use: {in: [residencial, misto]}, lot_area: {gt: 1500}}
+      zone: ZM
+      priority: 8
+      message: "Uso residencial ou misto em lote com mais de 1.500 m²: zona mista."
+    - when: {use: {in: [residencial, misto]}}
+      zone: ZR
+      priority: 5
+      message: "Uso residencial ou misto: zona residencial."
+
+sources:
+  - key: demo
+    kind: norma
+    title: "Plano Diretor fictício da Cidade Exemplo"
+    url: null
+    retrieved_at: "2026-10-21"
+    notes: "Documento fictício, criado apenas para demonstração e testes automatizados."
+
+x-modelos:
+  ca_min: &ca_min
+    label: "CA mínimo"
+    unit: ""
+    basis: {source: demo, ref: "Quadro de parâmetros — Cidade Exemplo"}
+
+  ca_base: &ca_base
+    label: "CA básico"
+    unit: ""
+    basis: {source: demo, ref: "Quadro de parâmetros — Cidade Exemplo"}
+
+  ca_max: &ca_max
+    label: "Coeficiente de Aproveitamento máximo (CA)"
+    unit: ""
+    check: {type: ratio_max, numerator: total_built_area, denominator: lot_area}
+    basis: {source: demo, ref: "Quadro de parâmetros — Cidade Exemplo"}
+
+  to_max: &to_max
+    label: "Taxa de Ocupação máxima (TO)"
+    unit: ""
+    check: {type: ratio_max, numerator: footprint_area, denominator: lot_area}
+    alternatives:
+      - value: 0.6
+        when: {lot_area: {lt: 300}}
+        basis: {source: demo, ref: "Quadro de parâmetros — TO para lotes até 300 m²"}
+        message: "TO aplicável a lotes com área de até 300,00 m²."
+      - value: 0.5
+        when: {lot_area: {gte: 300}}
+        basis: {source: demo, ref: "Quadro de parâmetros — TO para lotes acima de 300 m²"}
+        message: "TO aplicável a lotes com área igual ou superior a 300,00 m²."
+
+  max_height: &max_height
+    label: "Gabarito de altura máxima"
+    unit: "m"
+    check: {type: lte, field: building_height}
+    basis: {source: demo, ref: "Quadro de parâmetros — Cidade Exemplo"}
+
+  setback_front: &setback_front
+    label: "Recuo frontal mínimo"
+    unit: "m"
+    check: {type: gte, field: proposed_setback_front}
+    basis: {source: demo, ref: "Quadro de parâmetros — Cidade Exemplo"}
+
+  setback_side_back: &setback_side_back
+    label: "Recuo lateral e de fundo mínimo"
+    unit: "m"
+    check: {type: gte, fields: [proposed_setback_side, proposed_setback_back]}
+    basis: {source: demo, ref: "Quadro de parâmetros — Cidade Exemplo"}
+
+  min_permeable_pct: &min_permeable_pct
+    label: "Área permeável mínima (% da área do lote)"
+    unit: "%"
+    check: {type: min_area_from_pct, field: permeable_area, base: lot_area}
+    basis: {source: demo, ref: "Quadro de parâmetros — Cidade Exemplo"}
+
+questions:
+  - key: lot_area
+    label: "Área do lote"
+    type: number
+    required: true
+    unit: "m²"
+
+  - key: lot_front
+    label: "Largura da testada"
+    type: number
+    unit: "m"
+
+  - key: use
+    label: "Uso predominante pretendido"
+    type: select
+    required: true
+    options: [residencial, comercial, industrial, misto, servico, institucional]
+
+  - key: floors
+    label: "Número de pavimentos"
+    type: number
+    unit: "pav."
+
+  - key: floor_height
+    label: "Pé-direito (para apurar a altura)"
+    type: number
+    unit: "m"
+    default: 3.0
+
+  - key: building_height
+    label: "Altura da edificação"
+    type: derived
+    derivations:
+      - fact: building_height
+        op: mul
+        args: [floors, floor_height]
+
+  - key: footprint_area
+    label: "Área de projeção da edificação (implantação no térreo)"
+    type: number
+    unit: "m²"
+
+  - key: total_built_area
+    label: "Área construída computável total"
+    type: number
+    unit: "m²"
+
+  - key: permeable_area
+    label: "Área permeável do projeto (jardins, piso drenante, etc.)"
+    type: number
+    unit: "m²"
+
+  - key: proposed_setback_front
+    label: "Recuo frontal adotado no projeto"
+    type: number
+    unit: "m"
+
+  - key: proposed_setback_side
+    label: "Recuo lateral adotado no projeto"
+    type: number
+    unit: "m"
+
+  - key: proposed_setback_back
+    label: "Recuo de fundo adotado no projeto"
+    type: number
+    unit: "m"
+
+  - key: lat
+    label: "Latitude do imóvel"
+    type: number
+
+  - key: lon
+    label: "Longitude do imóvel"
+    type: number
+
+zones:
+  - code: ZR
+    name: "Zona Residencial"
+    group: "ZR"
+    description: "Zona de uso predominantemente residencial."
+    params:
+      ca_min: {<<: *ca_min, value: 0.25, basis: {source: demo, ref: "ZR"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: demo, ref: "ZR"}}
+      ca_max: {<<: *ca_max, value: 2, basis: {source: demo, ref: "ZR"}}
+      to_max: {<<: *to_max, basis: {source: demo, ref: "ZR"}}
+      max_height: {<<: *max_height, value: 15, basis: {source: demo, ref: "ZR"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: demo, ref: "ZR"}}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: demo, ref: "ZR"}}
+      min_permeable_pct: {<<: *min_permeable_pct, value: 20, basis: {source: demo, ref: "ZR"}}
+
+  - code: ZM
+    name: "Zona Mista"
+    group: "ZM"
+    description: "Zona mista residencial e não residencial."
+    params:
+      ca_min: {<<: *ca_min, value: 0.3, basis: {source: demo, ref: "ZM"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: demo, ref: "ZM"}}
+      ca_max: {<<: *ca_max, value: 2.5, basis: {source: demo, ref: "ZM"}}
+      to_max: {<<: *to_max, basis: {source: demo, ref: "ZM"}}
+      max_height: {<<: *max_height, value: 24, basis: {source: demo, ref: "ZM"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: demo, ref: "ZM"}}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: demo, ref: "ZM"}}
+      min_permeable_pct: {<<: *min_permeable_pct, value: 20, basis: {source: demo, ref: "ZM"}}
+
+  - code: ZC
+    name: "Zona Central"
+    group: "ZC"
+    description: "Núcleo comercial com maior densidade."
+    params:
+      ca_min: {<<: *ca_min, value: 0.5, basis: {source: demo, ref: "ZC"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: demo, ref: "ZC"}}
+      ca_max: {<<: *ca_max, value: 3, basis: {source: demo, ref: "ZC"}}
+      to_max: {<<: *to_max, basis: {source: demo, ref: "ZC"}}
+      max_height: {<<: *max_height, value: 45, basis: {source: demo, ref: "ZC"}}
+      setback_front: {<<: *setback_front, value: 3, basis: {source: demo, ref: "ZC"}}
+      setback_side_back: {<<: *setback_side_back, value: 2, basis: {source: demo, ref: "ZC"}}
+      min_permeable_pct: {<<: *min_permeable_pct, value: 15, basis: {source: demo, ref: "ZC"}}
+
+  - code: ZI
+    name: "Zona Industrial"
+    group: "ZI"
+    description: "Zona de uso industrial, com recuos amplos e baixa ocupação."
+    params:
+      ca_min: {<<: *ca_min, value: 0.1, basis: {source: demo, ref: "ZI"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: demo, ref: "ZI"}}
+      ca_max: {<<: *ca_max, value: 1.5, basis: {source: demo, ref: "ZI"}}
+      to_max: {<<: *to_max, basis: {source: demo, ref: "ZI"}}
+      max_height: {<<: *max_height, value: 12, basis: {source: demo, ref: "ZI"}}
+      setback_front: {<<: *setback_front, value: 8, basis: {source: demo, ref: "ZI"}}
+      setback_side_back: {<<: *setback_side_back, value: 5, basis: {source: demo, ref: "ZI"}}
+      min_permeable_pct: {<<: *min_permeable_pct, value: 10, basis: {source: demo, ref: "ZI"}}
+
+rules:
+  - code: demo-lote-pequeno
+    title: "Lote pequeno na zona residencial"
+    message: "Lotes com até 300,00 m² têm TO de 0,60 na ZR."
+    severity: info
+    applies_to_zones: [ZR]
+    when: {lot_area: {lte: 300}}
+    effects:
+      - type: warning
+        title: "TO diferenciada"
+        message: "Para lotes de até 300,00 m² a Taxa de Ocupação máxima admitida é 0,60."
+        severity: info
+    basis: {source: demo, ref: "Quadro de parâmetros — TO"}

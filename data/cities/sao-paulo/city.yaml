@@ -1,0 +1,1029 @@
+slug: sao-paulo
+name: São Paulo
+uf: SP
+ibge: "3550308"
+is_demo: false
+description: >-
+  São Paulo - Lei nº 16.402/2016 (LUOS) e Lei nº 16.050/2014 (Plano Diretor Estratégico).
+  Os parâmetros de ocupação são os do Anexo 3 - Quadro 3 da lei, no texto compilado
+  com as alterações das Leis nº 18.081/2024 e nº 18.177/2024.
+
+zone_selection:
+  method: manual
+  hint: >-
+    O zoneamento do imóvel é definido pelo mapa oficial do município
+    (Lei nº 16.402/2016, Anexo 3 - Quadro 3). Consulte o mapa no GeoSampa,
+    identifique a sigla da zona e selecione-a abaixo.
+  helper_url: "https://geosampa.prefeitura.sp.gov.br/"
+
+sources:
+  - key: luos
+    kind: lei
+    number: "16.402"
+    year: 2016
+    title: "Lei nº 16.402/2016 — Parcelamento, uso e ocupação do solo (LUOS)"
+    url: "https://legislacao.prefeitura.sp.gov.br/lei-16402-de-22-de-marco-de-2016"
+    consolidated_as_of: "2024-07-25"
+    retrieved_at: "2026-10-21"
+    notes: >-
+      Texto compilado (consolidado) com as alterações promovidas pela Lei nº 18.081/2024
+      e pela Lei nº 18.177/2024. Conferir a redação vigente na data do protocolo.
+
+  - key: quadro3
+    kind: anexo
+    title: "Anexo 3 da Lei nº 16.402/2016 — Quadro 3: Parâmetros de ocupação (exceto Quota Ambiental)"
+    url: "https://app-plpconsulta-prd.azurewebsites.net/Forms/MostrarArquivo?TIPO=Lei&NUMERO=16402&ANO=2016&DOCUMENTO=ANEXO&Anexo=3"
+    consolidated_as_of: "2024-07-25"
+    retrieved_at: "2026-10-21"
+    notes: >-
+      Fonte dos coeficientes, taxas de ocupação, gabaritos e recuos reproduzidos neste
+      cadastro. As notas de letra (a) a (o) do Quadro 3 foram convertidas em
+      observações e regras condicionais.
+
+  - key: pde
+    kind: lei
+    number: "16.050"
+    year: 2014
+    title: "Lei nº 16.050/2014 — Plano Diretor Estratégico (PDE)"
+    url: "https://legislacao.prefeitura.sp.gov.br/lei-16050-de-31-de-julho-de-2014"
+    retrieved_at: "2026-10-21"
+    notes: "Referenciada pela LUOS (arts. 8º, 83, 111, 112, 275, 362 e 363)."
+
+# ---------------------------------------------------------------------------
+# Modelos de parâmetro (evita repetição; podem ser sobrescritos por zona)
+# ---------------------------------------------------------------------------
+x-modelos:
+  ca_min: &ca_min
+    label: "CA mínimo"
+    unit: ""
+    basis: {source: quadro3, ref: "Quadro 3"}
+
+  ca_base: &ca_base
+    label: "CA básico (potencial construtivo sem outorga onerosa)"
+    unit: ""
+    basis: {source: quadro3, ref: "Quadro 3"}
+
+  ca_max: &ca_max
+    label: "Coeficiente de Aproveitamento máximo (CA)"
+    unit: ""
+    check: {type: ratio_max, numerator: total_built_area, denominator: lot_area}
+    basis: {source: quadro3, ref: "Quadro 3"}
+
+  to_max: &to_max
+    label: "Taxa de Ocupação máxima (TO)"
+    unit: ""
+    check: {type: ratio_max, numerator: footprint_area, denominator: lot_area}
+    alternatives:
+      - value: 0.85
+        when: {lot_area: {lt: 500}}
+        basis: {source: quadro3, ref: "Quadro 3 — TO para lotes de até 500,00 m²"}
+        message: "TO aplicável a lotes com área de até 500,00 m²."
+      - value: 0.70
+        when: {lot_area: {gte: 500}}
+        basis: {source: quadro3, ref: "Quadro 3 — TO para lotes com área igual ou superior a 500,00 m²"}
+        message: "TO aplicável a lotes com área igual ou superior a 500,00 m²."
+
+  max_height: &max_height
+    label: "Gabarito de altura máxima"
+    unit: "m"
+    check: {type: lte, field: building_height}
+    basis: {source: quadro3, ref: "Quadro 3"}
+
+  setback_front: &setback_front
+    label: "Recuo frontal mínimo"
+    unit: "m"
+    check: {type: gte, field: proposed_setback_front}
+    basis: {source: quadro3, ref: "Quadro 3"}
+
+  setback_side_back: &setback_side_back
+    label: "Recuo lateral e de fundo mínimo"
+    unit: "m"
+    check: {type: gte, fields: [proposed_setback_side, proposed_setback_back]}
+    basis: {source: quadro3, ref: "Quadro 3"}
+
+  cota_unidade: &cota_unidade
+    label: "Cota parte máxima de terreno por unidade"
+    unit: "m²"
+    basis: {source: quadro3, ref: "Quadro 3"}
+    notes:
+      - "Verificar aplicabilidade e exceções na Lei nº 16.050/2014 (arts. 111 e 112) e no art. 73 da Lei nº 16.402/2016."
+
+# ---------------------------------------------------------------------------
+# Questionário do engenheiro
+# ---------------------------------------------------------------------------
+questions:
+  - key: lot_area
+    label: "Área do lote"
+    type: number
+    required: true
+    unit: "m²"
+    help: "Área do terreno conforme matrícula/planta cadastral (após eventual desmembramento)."
+
+  - key: lot_front
+    label: "Largura da testada (frente do lote)"
+    type: number
+    unit: "m"
+    help: "Usada nas dispensas do art. 66, III e nos tratamentos de testada do art. 72, III."
+
+  - key: use
+    label: "Uso predominante pretendido"
+    type: select
+    required: true
+    options: [residencial, comercial, industrial, misto, servico, institucional, ensino, saude, hotel]
+
+  - key: floors
+    label: "Número de pavimentos"
+    type: number
+    unit: "pav."
+    help: "Com o pé-direito informado, define a altura usada no art. 66, I e no gabarito do Quadro 3."
+
+  - key: floor_height
+    label: "Pé-direito (para apurar a altura)"
+    type: number
+    unit: "m"
+    default: 3.0
+
+  - key: building_height
+    label: "Altura da edificação"
+    type: derived
+    derivations:
+      - fact: building_height
+        op: mul
+        args: [floors, floor_height]
+
+  - key: footprint_area
+    label: "Área de projeção da edificação (implantação no térreo)"
+    type: number
+    unit: "m²"
+    help: "Base de cálculo da Taxa de Ocupação (TO)."
+
+  - key: total_built_area
+    label: "Área construída computável total"
+    type: number
+    unit: "m²"
+    help: "Base de cálculo do CA. Descontar as áreas não computáveis do art. 62."
+
+  - key: units
+    label: "Número de unidades residenciais / empreendimentos"
+    type: number
+
+  - key: proposed_setback_front
+    label: "Recuo frontal adotado no projeto"
+    type: number
+    unit: "m"
+
+  - key: proposed_setback_side
+    label: "Recuo lateral adotado no projeto"
+    type: number
+    unit: "m"
+
+  - key: proposed_setback_back
+    label: "Recuo de fundo adotado no projeto"
+    type: number
+    unit: "m"
+
+  - key: sidewalk_width
+    label: "Largura atual do passeio público"
+    type: number
+    unit: "m"
+    help: "Abaixo de 5,00 m há exigência de alargamento em diversas zonas (art. 67)."
+
+  - key: block_face_occupied_pct
+    label: "Percentual da face de quadra ocupado por edificações no alinhamento"
+    type: number
+    unit: "%"
+    help: "A partir de 50% o recuo frontal deixa de ser exigido (art. 69)."
+
+  - key: neighbor_attached
+    label: "Há edificação vizinha encostada na divisa do lote?"
+    type: boolean
+    help: "A dispensa do recuo lateral/de fundo depende de análise caso a caso do órgão (art. 66, II)."
+
+  - key: uses_art91
+    label: "Utiliza majoração de gabarito do art. 91?"
+    type: boolean
+    help: "ZCOR-2, ZCOR-3 e ZCORa: majoração de até 50% do gabarito, com anuência dos vizinhos."
+
+  - key: geotechnical_area
+    label: "O terreno está em UG-I ou apresenta recalques/problemas geotécnicos?"
+    type: boolean
+    help: "Dispara as exigências adicionais do art. 72 (permeabilidade mínima de 20%/15% e seguros)."
+
+# ---------------------------------------------------------------------------
+# Zonas (Anexo 3 — Quadro 3 da Lei nº 16.402/2016)
+# ---------------------------------------------------------------------------
+zones:
+  - code: ZEU
+    name: "Zona de Uso Especial"
+    group: "ZEU"
+    description: "Zonas de uso especial (eixos ou Shopping Centers)."
+    params:
+      ca_min: {<<: *ca_min, value: 0.5, basis: {source: quadro3, ref: "Quadro 3, linha ZEU"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZEU"}}
+      ca_max: {<<: *ca_max, value: 4, basis: {source: quadro3, ref: "Quadro 3, linha ZEU"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZEU"}}
+      max_height: {<<: *max_height, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEU"}, notes: ["Não há gabarito fixo no Quadro 3 para esta zona."]}
+      setback_front: {<<: *setback_front, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEU"}, notes: ["Sem recuo frontal no Quadro 3. Em ZEU o alargamento do passeio público é obrigatório (art. 67, I)."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZEU"}, notes: ["(j) Os recuos laterais e de fundo para altura da edificação superior a 10 m serão dispensados conforme os incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: 20, basis: {source: quadro3, ref: "Quadro 3, linha ZEU"}}
+
+  - code: ZEUa
+    name: "Zona de Uso Especial Ambiental"
+    group: "ZEU"
+    description: "Zonas de uso especial com parâmetro ambiental (ver Quadro 3 e art. 5º, § 2º)."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEUa"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZEUa"}}
+      ca_max: {<<: *ca_max, value: 2, basis: {source: quadro3, ref: "Quadro 3, linha ZEUa"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZEUa"}}
+      max_height: {<<: *max_height, value: 28, basis: {source: quadro3, ref: "Quadro 3, linha ZEUa"}}
+      setback_front: {<<: *setback_front, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEUa"}, notes: ["Sem recuo frontal no Quadro 3; alargamento do passeio público obrigatório (art. 67, I)."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZEUa"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: 40, basis: {source: quadro3, ref: "Quadro 3, linha ZEUa"}}
+
+  - code: ZEUP
+    name: "Zona de Uso Especial Previsto"
+    group: "ZEUP"
+    description: "Zonas de uso especial previsto no zoneamento. (b) Atendidos os requisitos do art. 83 da Lei nº 16.050/2014, a zona ZEUP passa a recepcionar automaticamente os parâmetros da zona ZEU."
+    params:
+      ca_min: {<<: *ca_min, value: 0.5, basis: {source: quadro3, ref: "Quadro 3, linha ZEUP"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZEUP"}}
+      ca_max: {<<: *ca_max, value: 2, basis: {source: quadro3, ref: "Quadro 3, linha ZEUP"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZEUP"}}
+      max_height: {<<: *max_height, value: 28, basis: {source: quadro3, ref: "Quadro 3, linha ZEUP"}}
+      setback_front: {<<: *setback_front, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEUP"}, notes: ["Sem recuo frontal no Quadro 3; alargamento do passeio público obrigatório (art. 67, I)."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZEUP"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEUP"}}
+
+  - code: ZEUPa
+    name: "Zona de Uso Especial Previsto Ambiental"
+    group: "ZEUP"
+    description: "Zonas de uso especial previsto com parâmetro ambiental. (c) Atendidos os requisitos do art. 83 da Lei nº 16.050/2014, a zona ZEUPa passa a recepcionar automaticamente os parâmetros da zona ZEUa."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEUPa"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZEUPa"}}
+      ca_max: {<<: *ca_max, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZEUPa"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZEUPa"}}
+      max_height: {<<: *max_height, value: 28, basis: {source: quadro3, ref: "Quadro 3, linha ZEUPa"}}
+      setback_front: {<<: *setback_front, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEUPa"}, notes: ["Sem recuo frontal no Quadro 3; alargamento do passeio público obrigatório (art. 67, I)."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZEUPa"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEUPa"}}
+
+  - code: ZEM
+    name: "Zona Eixo de Estruturação da Transformação Metropolitana"
+    group: "ZEM"
+    description: "Eixos de estruturação da transformação metropolitana (art. 8º)."
+    params:
+      ca_min: {<<: *ca_min, value: 0.5, basis: {source: quadro3, ref: "Quadro 3, linha ZEM"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZEM"}}
+      ca_max: {<<: *ca_max, value: 2, basis: {source: quadro3, ref: "Quadro 3, linha ZEM"}, notes: ["(d) O CAmáx será igual a 4 nos casos dispostos no § 1º do art. 8º da Lei nº 16.402/2016."]}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZEM"}}
+      max_height: {<<: *max_height, value: 28, basis: {source: quadro3, ref: "Quadro 3, linha ZEM"}, notes: ["O art. 8º, § 1º prevê a dispensa de atendimento ao gabarito máximo de altura nas hipóteses ali indicadas."]}
+      setback_front: {<<: *setback_front, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEM"}, notes: ["Sem recuo frontal no Quadro 3; alargamento do passeio público obrigatório (art. 67, I)."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZEM"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: 20, basis: {source: quadro3, ref: "Quadro 3, linha ZEM"}}
+
+  - code: ZEMP
+    name: "Zona Eixo de Estruturação da Transformação Metropolitana Previsto"
+    group: "ZEM"
+    description: "Eixos de estruturação metropolitana previstos (art. 8º, § 2º)."
+    params:
+      ca_min: {<<: *ca_min, value: 0.5, basis: {source: quadro3, ref: "Quadro 3, linha ZEMP"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZEMP"}}
+      ca_max: {<<: *ca_max, value: 2, basis: {source: quadro3, ref: "Quadro 3, linha ZEMP"}, notes: ["(e) O CAmáx será igual a 4 nos casos dispostos nos § 2º do art. 8º da Lei nº 16.402/2016."]}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZEMP"}}
+      max_height: {<<: *max_height, value: 28, basis: {source: quadro3, ref: "Quadro 3, linha ZEMP"}}
+      setback_front: {<<: *setback_front, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEMP"}, notes: ["Sem recuo frontal no Quadro 3; alargamento do passeio público obrigatório (art. 67, I)."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZEMP"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: 40, basis: {source: quadro3, ref: "Quadro 3, linha ZEMP"}}
+
+  - code: ZC
+    name: "Zona Central"
+    group: "ZC"
+    description: "Núcleo central da cidade, com incentives de verticalização."
+    params:
+      ca_min: {<<: *ca_min, value: 0.3, basis: {source: quadro3, ref: "Quadro 3, linha ZC"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZC"}}
+      ca_max: {<<: *ca_max, value: 2, basis: {source: quadro3, ref: "Quadro 3, linha ZC"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZC"}}
+      max_height: {<<: *max_height, value: 48, basis: {source: quadro3, ref: "Quadro 3, linha ZC"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZC"}, notes: ["(i) O recuo frontal será facultativo quando atendido o disposto nos arts. 67 ou 69 da Lei nº 16.402/2016."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZC"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZC"}}
+
+  - code: ZCa
+    name: "Zona Central Ambiental"
+    group: "ZC"
+    description: "Zona Central com parâmetro ambiental (ver Quadro 3 e art. 5º, § 2º)."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZCa"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZCa"}}
+      ca_max: {<<: *ca_max, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZCa"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZCa"}}
+      max_height: {<<: *max_height, value: 20, basis: {source: quadro3, ref: "Quadro 3, linha ZCa"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZCa"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZCa"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZCa"}}
+
+  - code: ZC-ZEIS
+    name: "Zona Central lindeira à ZEIS"
+    group: "ZC"
+    description: "Zona Central na faixa lindeira às ZEIS."
+    params:
+      ca_min: {<<: *ca_min, value: 0.5, basis: {source: quadro3, ref: "Quadro 3, linha ZC-ZEIS"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZC-ZEIS"}}
+      ca_max: {<<: *ca_max, value: 2, basis: {source: quadro3, ref: "Quadro 3, linha ZC-ZEIS"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZC-ZEIS"}}
+      max_height: {<<: *max_height, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZC-ZEIS"}, notes: ["Não há gabarito fixo no Quadro 3 para esta zona."]}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZC-ZEIS"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZC-ZEIS"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZC-ZEIS"}}
+
+  - code: ZCOR-1
+    name: "Zona Corredor 1"
+    group: "ZCOR"
+    description: "Corredores de commerce e serviços."
+    params:
+      ca_min: {<<: *ca_min, value: 0.05, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-1"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-1"}}
+      ca_max: {<<: *ca_max, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-1"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-1"}}
+      max_height: {<<: *max_height, value: 10, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-1"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-1"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-1"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-1"}}
+
+  - code: ZCOR-2
+    name: "Zona Corredor 2"
+    group: "ZCOR"
+    description: "Corredores com majoração de gabarito (art. 91)."
+    params:
+      ca_min: {<<: *ca_min, value: 0.05, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-2"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-2"}}
+      ca_max: {<<: *ca_max, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-2"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-2"}}
+      max_height: {<<: *max_height, value: 10, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-2"}, notes: ["O gabarito pode ser majorado em até 50% nas hipóteses do art. 91 (ver nota (n) do Quadro 3)."]}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-2"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-2"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-2"}}
+
+  - code: ZCOR-3
+    name: "Zona Corredor 3"
+    group: "ZCOR"
+    description: "Corredores com majoração de gabarito (art. 91)."
+    params:
+      ca_min: {<<: *ca_min, value: 0.05, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-3"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-3"}}
+      ca_max: {<<: *ca_max, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-3"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-3"}}
+      max_height: {<<: *max_height, value: 10, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-3"}, notes: ["O gabarito pode ser majorado em até 50% nas hipóteses do art. 91 (ver nota (n) do Quadro 3)."]}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-3"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-3"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZCOR-3"}}
+
+  - code: ZCORa
+    name: "Zona Corredor Ambiental"
+    group: "ZCOR"
+    description: "Corredor com parâmetro ambiental."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZCORa"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZCORa"}}
+      ca_max: {<<: *ca_max, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZCORa"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZCORa"}}
+      max_height: {<<: *max_height, value: 10, basis: {source: quadro3, ref: "Quadro 3, linha ZCORa"}, notes: ["O gabarito pode ser majorado em até 50% nas hipóteses do art. 91 (ver nota (n) do Quadro 3)."]}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZCORa"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZCORa"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZCORa"}}
+
+  - code: ZM
+    name: "Zona Mista"
+    group: "ZM"
+    description: "Zona mista de uso residencial e não residencial."
+    params:
+      ca_min: {<<: *ca_min, value: 0.3, basis: {source: quadro3, ref: "Quadro 3, linha ZM"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZM"}}
+      ca_max: {<<: *ca_max, value: 2, basis: {source: quadro3, ref: "Quadro 3, linha ZM"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZM"}}
+      max_height: {<<: *max_height, value: 28, basis: {source: quadro3, ref: "Quadro 3, linha ZM"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZM"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZM"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZM"}}
+
+  - code: ZMa
+    name: "Zona Mista Ambiental"
+    group: "ZM"
+    description: "Zona mista com parâmetro ambiental (ver Quadro 3 e art. 5º, § 2º)."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZMa"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZMa"}}
+      ca_max: {<<: *ca_max, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZMa"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZMa"}}
+      max_height: {<<: *max_height, value: 15, basis: {source: quadro3, ref: "Quadro 3, linha ZMa"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZMa"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZMa"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZMa"}}
+
+  - code: ZMIS
+    name: "Zona Mista de Interesse Social"
+    group: "ZM"
+    description: "Zona mista de interesse social (ZEIS)."
+    params:
+      ca_min: {<<: *ca_min, value: 0.3, basis: {source: quadro3, ref: "Quadro 3, linha ZMIS"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZMIS"}}
+      ca_max: {<<: *ca_max, value: 2, basis: {source: quadro3, ref: "Quadro 3, linha ZMIS"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZMIS"}}
+      max_height: {<<: *max_height, value: 28, basis: {source: quadro3, ref: "Quadro 3, linha ZMIS"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZMIS"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZMIS"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZMIS"}}
+
+  - code: ZMISa
+    name: "Zona Mista de Interesse Social Ambiental"
+    group: "ZM"
+    description: "ZMIS com parâmetro ambiental (ver Quadro 3 e art. 5º, § 2º)."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZMISa"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZMISa"}}
+      ca_max: {<<: *ca_max, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZMISa"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZMISa"}}
+      max_height: {<<: *max_height, value: 15, basis: {source: quadro3, ref: "Quadro 3, linha ZMISa"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZMISa"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZMISa"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZMISa"}}
+
+  - code: ZEIS-1
+    name: "ZEIS 1 — Zona Especial de Interesse Social 1"
+    group: "ZEIS"
+    description: "Zona Especial de Interesse Social 1."
+    params:
+      ca_min: {<<: *ca_min, value: 0.5, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-1"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-1"}}
+      ca_max:
+        <<: *ca_max
+        value: 2.5
+        basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-1"}
+        alternatives:
+          - value: 2
+            when: {lot_area: {lt: 1000}}
+            basis: {source: quadro3, ref: "Quadro 3, nota (f)"}
+            notes: ["(f) O CAmáx será igual a 2 nos casos em que o lote for menor que 1.000 m²."]
+            message: "CA máximo reduzido para 2,00 (nota (f) do Quadro 3): lote com área inferior a 1.000 m²."
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-1"}}
+      max_height: {<<: *max_height, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-1"}, notes: ["Não há gabarito fixo no Quadro 3 para esta zona."]}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-1"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-1"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-1"}}
+
+  - code: ZEIS-2
+    name: "ZEIS 2 — Zona Especial de Interesse Social 2"
+    group: "ZEIS"
+    description: "Zona Especial de Interesse Social 2."
+    params:
+      ca_min: {<<: *ca_min, value: 0.5, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-2"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-2"}}
+      ca_max:
+        <<: *ca_max
+        value: 4
+        basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-2"}
+        alternatives:
+          - value: 2
+            when: {lot_area: {lt: 1000}}
+            basis: {source: quadro3, ref: "Quadro 3, nota (f)"}
+            notes: ["(f) O CAmáx será igual a 2 nos casos em que o lote for menor que 1.000 m²."]
+            message: "CA máximo reduzido para 2,00 (nota (f) do Quadro 3): lote com área inferior a 1.000 m²."
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-2"}}
+      max_height: {<<: *max_height, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-2"}, notes: ["Não há gabarito fixo no Quadro 3 para esta zona."]}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-2"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-2"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-2"}}
+
+  - code: ZEIS-3
+    name: "ZEIS 3"
+    group: "ZEIS"
+    description: "Zona Especial de Interesse Social 3."
+    params:
+      ca_min: {<<: *ca_min, value: 0.5, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-3"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-3"}}
+      ca_max:
+        <<: *ca_max
+        value: 4
+        basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-3"}
+        alternatives:
+          - value: 2
+            when: {lot_area: {lt: 500}}
+            basis: {source: quadro3, ref: "Quadro 3, nota (g)"}
+            notes: ["(g) O CAmáx será igual a 2 nos casos em que o lote for menor que 500 m²."]
+            message: "CA máximo reduzido para 2,00 (nota (g) do Quadro 3): lote com área inferior a 500 m²."
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-3"}}
+      max_height: {<<: *max_height, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-3"}, notes: ["Não há gabarito fixo no Quadro 3 para esta zona."]}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-3"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-3"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-3"}}
+
+  - code: ZEIS-4
+    name: "ZEIS 4"
+    group: "ZEIS"
+    description: "Zona Especial de Interesse Social 4."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-4"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-4"}}
+      ca_max:
+        <<: *ca_max
+        value: 2
+        basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-4"}
+        alternatives:
+          - value: 1
+            when: {lot_area: {lt: 1000}}
+            basis: {source: quadro3, ref: "Quadro 3, nota (h)"}
+            notes: ["(h) O CAmáx será igual a 1 nos casos em que o lote for menor que 1.000 m²."]
+            message: "CA máximo reduzido para 1,00 (nota (h) do Quadro 3): lote com área inferior a 1.000 m²."
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-4"}}
+      max_height: {<<: *max_height, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-4"}, notes: ["Não há gabarito fixo no Quadro 3 para esta zona."]}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-4"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-4"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-4"}}
+
+  - code: ZEIS-5
+    name: "ZEIS 5"
+    group: "ZEIS"
+    description: "Zona Especial de Interesse Social 5."
+    params:
+      ca_min: {<<: *ca_min, value: 0.5, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-5"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-5"}}
+      ca_max:
+        <<: *ca_max
+        value: 4
+        basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-5"}
+        alternatives:
+          - value: 2
+            when: {lot_area: {lt: 1000}}
+            basis: {source: quadro3, ref: "Quadro 3, nota (f)"}
+            notes: ["(f) O CAmáx será igual a 2 nos casos em que o lote for menor que 1.000 m²."]
+            message: "CA máximo reduzido para 2,00 (nota (f) do Quadro 3): lote com área inferior a 1.000 m²."
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-5"}}
+      max_height: {<<: *max_height, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-5"}, notes: ["Não há gabarito fixo no Quadro 3 para esta zona."]}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-5"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-5"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEIS-5"}}
+
+  - code: ZDE-1
+    name: "Zona de Desenvolvimento Especial 1"
+    group: "ZDE"
+    description: "Zona de desenvolvimento especial (Arena Corinthians)."
+    params:
+      ca_min: {<<: *ca_min, value: 0.5, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-1"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-1"}}
+      ca_max: {<<: *ca_max, value: 2, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-1"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-1"}}
+      max_height: {<<: *max_height, value: 28, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-1"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-1"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-1"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-1"}}
+
+  - code: ZDE-2
+    name: "Zona de Desenvolvimento Especial 2"
+    group: "ZDE"
+    description: "Zona de desenvolvimento especial com recuos laterais e de fundo obrigatórios."
+    params:
+      ca_min: {<<: *ca_min, value: 0.5, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-2"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-2"}}
+      ca_max: {<<: *ca_max, value: 2, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-2"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-2"}}
+      max_height: {<<: *max_height, value: 28, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-2"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-2"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-2"}, notes: ["O art. 66, I da Lei nº 16.402/2016 não se aplica a esta zona: recuos laterais e de fundo de 3,00 m mantidos nas duas faixas de altura."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZDE-2"}}
+
+  - code: ZPI-1
+    name: "Zona Predominantemente Industrial 1"
+    group: "ZPI"
+    description: "Zona predominantemente industrial."
+    params:
+      ca_min: {<<: *ca_min, value: 0.5, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-1"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-1"}}
+      ca_max: {<<: *ca_max, value: 1.5, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-1"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-1"}}
+      max_height: {<<: *max_height, value: 28, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-1"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-1"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-1"}, notes: ["O art. 66, I da Lei nº 16.402/2016 não se aplica a esta zona: recuos laterais e de fundo de 3,00 m mantidos nas duas faixas de altura."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-1"}}
+
+  - code: ZPI-2
+    name: "Zona Predominantemente Industrial 2"
+    group: "ZPI"
+    description: "Zona predominantemente industrial com restrição de ocupação."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-2"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-2"}}
+      ca_max: {<<: *ca_max, value: 1.5, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-2"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-2"}}
+      max_height: {<<: *max_height, value: 28, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-2"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-2"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-2"}, notes: ["O art. 66, I da Lei nº 16.402/2016 não se aplica a esta zona: recuos laterais e de fundo de 3,00 m mantidos nas duas faixas de altura."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZPI-2"}}
+
+  - code: ZPR
+    name: "Zona Predominantemente Residencial"
+    group: "ZPR"
+    description: "Zona predominantemente residencial."
+    params:
+      ca_min: {<<: *ca_min, value: 0.05, basis: {source: quadro3, ref: "Quadro 3, linha ZPR"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZPR"}}
+      ca_max: {<<: *ca_max, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZPR"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZPR"}}
+      max_height: {<<: *max_height, value: 10, basis: {source: quadro3, ref: "Quadro 3, linha ZPR"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZPR"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZPR"}}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZPR"}}
+
+  - code: ZER-1
+    name: "Zona Exclusivamente Residencial 1"
+    group: "ZER"
+    description: "Zona exclusivamente residencial."
+    params:
+      ca_min: {<<: *ca_min, value: 0.05, basis: {source: quadro3, ref: "Quadro 3, linha ZER-1"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZER-1"}}
+      ca_max: {<<: *ca_max, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZER-1"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZER-1"}}
+      max_height: {<<: *max_height, value: 10, basis: {source: quadro3, ref: "Quadro 3, linha ZER-1"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZER-1"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZER-1"}}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZER-1"}}
+
+  - code: ZER-2
+    name: "Zona Exclusivamente Residencial 2"
+    group: "ZER"
+    description: "Zona exclusivamente residencial com comércios de apoio."
+    params:
+      ca_min: {<<: *ca_min, value: 0.05, basis: {source: quadro3, ref: "Quadro 3, linha ZER-2"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZER-2"}}
+      ca_max: {<<: *ca_max, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZER-2"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZER-2"}}
+      max_height: {<<: *max_height, value: 10, basis: {source: quadro3, ref: "Quadro 3, linha ZER-2"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZER-2"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZER-2"}}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZER-2"}}
+
+  - code: ZERa
+    name: "Zona Exclusivamente Residencial Ambiental"
+    group: "ZER"
+    description: "Zona exclusivamente residencial com parâmetro ambiental."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZERa"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZERa"}}
+      ca_max: {<<: *ca_max, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZERa"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZERa"}}
+      max_height: {<<: *max_height, value: 10, basis: {source: quadro3, ref: "Quadro 3, linha ZERa"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZERa"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZERa"}}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZERa"}}
+
+  - code: ZPDS
+    name: "Zona de Preservação e Desenvolvimento Sustentável"
+    group: "ZPDS"
+    description: "Zona de preservação e desenvolvimento sustentável."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZPDS"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZPDS"}}
+      ca_max: {<<: *ca_max, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha ZPDS"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZPDS"}}
+      max_height: {<<: *max_height, value: 20, basis: {source: quadro3, ref: "Quadro 3, linha ZPDS"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZPDS"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZPDS"}}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZPDS"}}
+
+  - code: ZPDSr
+    name: "Zona de Preservação e Desenvolvimento Sustentável restrito"
+    group: "ZPDS"
+    description: "ZPDS com parâmetros restritos."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZPDSr"}}
+      ca_base: {<<: *ca_base, value: 0.2, basis: {source: quadro3, ref: "Quadro 3, linha ZPDSr"}}
+      ca_max: {<<: *ca_max, value: 0.2, basis: {source: quadro3, ref: "Quadro 3, linha ZPDSr"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZPDSr"}}
+      max_height: {<<: *max_height, value: 10, basis: {source: quadro3, ref: "Quadro 3, linha ZPDSr"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZPDSr"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZPDSr"}}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZPDSr"}}
+
+  - code: ZEPAM
+    name: "Zona Especial de Proteção Ambiental"
+    group: "ZEPAM"
+    description: "Zona Especial de Proteção Ambiental."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEPAM"}}
+      ca_base: {<<: *ca_base, value: 0.1, basis: {source: quadro3, ref: "Quadro 3, linha ZEPAM"}}
+      ca_max: {<<: *ca_max, value: 0.1, basis: {source: quadro3, ref: "Quadro 3, linha ZEPAM"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha ZEPAM"}}
+      max_height: {<<: *max_height, value: 10, basis: {source: quadro3, ref: "Quadro 3, linha ZEPAM"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha ZEPAM"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha ZEPAM"}}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha ZEPAM"}}
+
+  - code: AVP-1
+    name: "Área Verde Pública 1"
+    group: "VERDES"
+    description: "Área verde pública com parâmetros definidos no art. 30 da Lei nº 16.402/2016."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha AVP-1"}, notes: ["(k) Ver art. 30 da Lei nº 16.402/2016."]}
+      ca_base: {<<: *ca_base, value: null, basis: {source: quadro3, ref: "Quadro 3, linha AVP-1"}, notes: ["(k) Ver art. 30 da Lei nº 16.402/2016."]}
+      ca_max: {<<: *ca_max, value: null, basis: {source: quadro3, ref: "Quadro 3, linha AVP-1"}, notes: ["(k) Ver art. 30 da Lei nº 16.402/2016."]}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha AVP-1"}, notes: ["(k) Ver art. 30 da Lei nº 16.402/2016."]}
+      max_height: {<<: *max_height, value: 28, basis: {source: quadro3, ref: "Quadro 3, linha AVP-1"}}
+      setback_front: {<<: *setback_front, value: null, basis: {source: quadro3, ref: "Quadro 3, linha AVP-1"}}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha AVP-1"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha AVP-1"}}
+
+  - code: AVP-2
+    name: "Área Verde Pública 2"
+    group: "VERDES"
+    description: "Área verde pública com parâmetros do art. 31 da Lei nº 16.402/2016."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha AVP-2"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha AVP-2"}}
+      ca_max: {<<: *ca_max, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha AVP-2"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha AVP-2"}}
+      max_height: {<<: *max_height, value: 28, basis: {source: quadro3, ref: "Quadro 3, linha AVP-2"}}
+      setback_front: {<<: *setback_front, value: null, basis: {source: quadro3, ref: "Quadro 3, linha AVP-2"}}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha AVP-2"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha AVP-2"}}
+
+  - code: AI
+    name: "Área Institucional"
+    group: "INSTITUCIONAIS"
+    description: "Área institucional de uso público."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha AI"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha AI"}}
+      ca_max: {<<: *ca_max, value: 4, basis: {source: quadro3, ref: "Quadro 3, linha AI"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha AI"}}
+      max_height: {<<: *max_height, value: 28, basis: {source: quadro3, ref: "Quadro 3, linha AI"}}
+      setback_front: {<<: *setback_front, value: null, basis: {source: quadro3, ref: "Quadro 3, linha AI"}}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha AI"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha AI"}}
+
+  - code: Ala
+    name: "Área Institucional — Ala"
+    group: "INSTITUCIONAIS"
+    description: "Área institucional com parâmetros restritos (equipamento público social)."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha Ala"}}
+      ca_base: {<<: *ca_base, value: 1, basis: {source: quadro3, ref: "Quadro 3, linha Ala"}}
+      ca_max: {<<: *ca_max, value: 2, basis: {source: quadro3, ref: "Quadro 3, linha Ala"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha Ala"}}
+      max_height: {<<: *max_height, value: 15, basis: {source: quadro3, ref: "Quadro 3, linha Ala"}}
+      setback_front: {<<: *setback_front, value: null, basis: {source: quadro3, ref: "Quadro 3, linha Ala"}}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha Ala"}, notes: ["(j) Ver incisos II e III do art. 66."]}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha Ala"}}
+
+  - code: AC-1
+    name: "Clube Esportivo e Social 1"
+    group: "CLUBES"
+    description: "Clube esportivo e social (art. 29 da Lei nº 16.402/2016)."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha AC-1"}}
+      ca_base: {<<: *ca_base, value: 0.6, basis: {source: quadro3, ref: "Quadro 3, linha AC-1"}}
+      ca_max: {<<: *ca_max, value: 0.6, basis: {source: quadro3, ref: "Quadro 3, linha AC-1"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha AC-1"}}
+      max_height: {<<: *max_height, value: 20, basis: {source: quadro3, ref: "Quadro 3, linha AC-1"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha AC-1"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha AC-1"}}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha AC-1"}}
+
+  - code: AC-2
+    name: "Clube de Campo 2"
+    group: "CLUBES"
+    description: "Clube de campo esportivo (art. 29 da Lei nº 16.402/2016)."
+    params:
+      ca_min: {<<: *ca_min, value: null, basis: {source: quadro3, ref: "Quadro 3, linha AC-2"}}
+      ca_base: {<<: *ca_base, value: 0.4, basis: {source: quadro3, ref: "Quadro 3, linha AC-2"}}
+      ca_max: {<<: *ca_max, value: 0.4, basis: {source: quadro3, ref: "Quadro 3, linha AC-2"}}
+      to_max: {<<: *to_max, basis: {source: quadro3, ref: "Quadro 3, linha AC-2"}}
+      max_height: {<<: *max_height, value: 10, basis: {source: quadro3, ref: "Quadro 3, linha AC-2"}}
+      setback_front: {<<: *setback_front, value: 5, basis: {source: quadro3, ref: "Quadro 3, linha AC-2"}, notes: ["(i) Recuo frontal facultativo nos casos dos arts. 67 ou 69."]}
+      setback_side_back: {<<: *setback_side_back, value: 3, basis: {source: quadro3, ref: "Quadro 3, linha AC-2"}}
+      cota_unidade: {<<: *cota_unidade, value: null, basis: {source: quadro3, ref: "Quadro 3, linha AC-2"}}
+
+# ---------------------------------------------------------------------------
+# Regras condicionais (o "questionário" que o engenheiro responde)
+# ---------------------------------------------------------------------------
+rules:
+  - code: dispensa-recuos-laterais-fundo-altura
+    title: "Dispensa de recuos laterais e de fundo por altura da edificação"
+    message: "Recuos laterais e de fundo dispensados (art. 66, I)."
+    severity: info
+    when: {building_height: {lte: 10}}
+    exclude_zones: [ZDE-2, ZPI-1, ZPI-2, AC-1, AC-2]
+    effects:
+      - type: override_param
+        param: setback_side_back
+        value: 0
+        message: "Dispensado: edificação com altura igual ou inferior a 10,00 m (art. 66, I da Lei nº 16.402/2016)."
+    basis: {source: luos, ref: "Art. 66, I"}
+
+  - code: dispensa-recuos-laterais-fundo-vizinho
+    title: "Dispensa de recuos laterais e de fundo por edificação vizinha encostada"
+    message: "Recuos laterais e de fundo dispensados mediante análise caso a caso (art. 66, II)."
+    severity: attention
+    when: {neighbor_attached: true}
+    exclude_zones: [ZDE-2, ZPI-1, ZPI-2, AC-1, AC-2]
+    effects:
+      - type: override_param
+        param: setback_side_back
+        value: 0
+        message: "Dispensado mediante análise caso a caso pelo órgão técnico competente (art. 66, II)."
+    basis: {source: luos, ref: "Art. 66, II"}
+
+  - code: dispensa-recuos-laterais-fundo-testada
+    title: "Dispensa de recuos laterais e de fundo por testada igual ou inferior a 10 m"
+    message: "Recuos laterais e de fundo dispensados (art. 66, III)."
+    severity: info
+    when: {lot_front: {lte: 10}}
+    exclude_zones: [ZDE-2, ZPI-1, ZPI-2, AC-1, AC-2]
+    effects:
+      - type: override_param
+        param: setback_side_back
+        value: 0
+        message: "Dispensado: terreno com frente igual ou inferior a 10,00 m (art. 66, III)."
+    basis: {source: luos, ref: "Art. 66, III"}
+
+  - code: dispensa-recuo-frontal-passeio
+    title: "Recuo frontal dispensado por passeio público com 5,00 m"
+    message: "Recuo frontal dispensado (art. 67, § 1º)."
+    severity: info
+    when: {sidewalk_width: {gte: 5}}
+    effects:
+      - type: override_param
+        param: setback_front
+        value: 0
+        message: "Dispensado: passeio público já com largura de 5,00 m ou com doação da faixa necessária (art. 67, § 1º)."
+    basis: {source: luos, ref: "Art. 67, § 1º"}
+
+  - code: dispensa-recuo-frontal-face-quadra
+    title: "Recuo frontal não exigido por ocupação da face de quadra"
+    message: "Recuo frontal não exigido (art. 69)."
+    severity: info
+    when: {block_face_occupied_pct: {gte: 50}}
+    effects:
+      - type: override_param
+        param: setback_front
+        value: 0
+        message: "Não exigido: no mínimo 50% da face de quadra ocupada por edificações no alinhamento (art. 69)."
+    basis: {source: luos, ref: "Art. 69"}
+
+  - code: passeio-publico-minimo
+    title: "Largura mínima do passeio público"
+    message: "Passeio público com largura inferior a 5,00 m: alargamento obrigatório nas zonas de que trata o art. 67."
+    severity: attention
+    applies_to_zones: [ZEU, ZEUa, ZEUP, ZEUPa, ZEM, ZEMP, ZC, ZCa, ZM, ZEIS-1, ZEIS-2, ZEIS-3, ZEIS-4, ZEIS-5]
+    when: {sidewalk_width: {lt: 5}}
+    effects:
+      - type: warning
+        title: "Alargamento do passeio público"
+        message: "Nas zonas previstas no art. 67, I, da Lei nº 16.402/2016 o alargamento do passeio público é obrigatório (passeio mínimo de 5,00 m)."
+        severity: attention
+    basis: {source: luos, ref: "Art. 67, caput e I"}
+
+  - code: passeio-publico-facultativo-zc
+    title: "Alargamento do passeio público facultativo em ZC e ZCa"
+    message: "Alargamento facultativo para lotes com até 2.500,00 m² (art. 67, II)."
+    severity: info
+    applies_to_zones: [ZC, ZCa]
+    when: {sidewalk_width: {lt: 5}, lot_area: {lte: 2500}}
+    effects:
+      - type: warning
+        title: "Alargamento do passeio público (facultativo)"
+        message: "Em ZC e ZCa, para lotes com área igual ou inferior a 2.500,00 m², o alargamento do passeio público é facultativo (art. 67, II)."
+        severity: info
+    basis: {source: luos, ref: "Art. 67, II"}
+
+  - code: quota-ambiental-obrigatoria
+    title: "Quota Ambiental (QA) — avaliação obrigatória"
+    message: "Lote com área superior a 500,00 m²: exigir pontuação mínima de QA (art. 76)."
+    severity: attention
+    when: {lot_area: {gt: 500}}
+    effects:
+      - type: warning
+        title: "Quota Ambiental (QA)"
+        message: "Para edificações novas ou reformas com alteração de área construída superior a 20%, é exigida pontuação mínima de QA (arts. 74 a 76 e Quadros 3A e 3B). O Executivo disponibiliza planilha de cálculo da QA."
+        severity: attention
+    basis: {source: luos, ref: "Arts. 74 a 76 e Quadros 3A e 3B"}
+
+  - code: quota-ambiental-isenca
+    title: "Isenção de Quota Ambiental"
+    message: "Lote com até 500,00 m²: isento da aplicação da QA (art. 76, § 2º)."
+    severity: info
+    when: {lot_area: {lte: 500}}
+    effects:
+      - type: warning
+        title: "Isenção de QA"
+        message: "Os lotes com área total igual ou inferior a 500,00 m² estão isentos da aplicação da QA (art. 76, § 2º), ressalvados os lotes originários de desmembramento ou desdobro cujo lote original tenha área superior à mínima exigida."
+        severity: info
+    basis: {source: luos, ref: "Art. 76, § 2º"}
+
+  - code: permeabilidade-minima
+    title: "Taxa de permeabilidade mínima"
+    message: "Atender a taxa de permeabilidade mínima do Perímetro de Qualificação Ambiental (art. 81 e Quadro 3A)."
+    severity: attention
+    effects:
+      - type: warning
+        title: "Permeabilidade mínima (Quadro 3A)"
+        message: "Todos os lotes devem atender às taxas de permeabilidade mínima de cada Perímetro de Qualificação Ambiental (Quadro 3A). Nos lotes com área superior a 500,00 m², fora de ZEPAM e ZPDS, a taxa pode ser reduzida em até 50% desde que atingida a pontuação de QA (art. 81, § 2º)."
+        severity: attention
+    basis: {source: luos, ref: "Art. 81 e Quadro 3A"}
+
+  - code: permeabilidade-ug1
+    title: "Permeabilidade mínima em terrenos com problemas geotécnicos"
+    message: "Taxa de permeabilidade mínima de 20% (lote > 500,00 m²) ou 15% (lote < 500,00 m²) — art. 72."
+    severity: attention
+    when: {geotechnical_area: true}
+    effects:
+      - type: warning
+        title: "Permeabilidade mínima (art. 72)"
+        message: "Em terrenos localizados na UG-I ou sujeitos a recalques: 20% da área do lote para lotes com área superior a 500,00 m² e 15% para lotes com área inferior a 500,00 m², vedada a redução do art. 81, § 2º. Exige ainda a contratação de seguro de obra e riscos de engenharia e de responsabilidade civil cruzada (art. 72, § 6º, III)."
+        severity: attention
+    basis: {source: luos, ref: "Art. 72, I, II e § 6º"}
+
+  - code: majoracao-gabarito-zcor
+    title: "Majoração de gabarito em corredores (art. 91)"
+    message: "ZCOR-2, ZCOR-3 e ZCORa: gabarito pode ser majorado em até 50% (art. 91)."
+    severity: info
+    applies_to_zones: [ZCOR-2, ZCOR-3, ZCORa]
+    effects:
+      - type: warning
+        title: "Majoração de gabarito (art. 91)"
+        message: "Nas ZCOR-2, ZCOR-3 e ZCORa o gabarito de altura máxima pode ser majorado em até 50%, mediante uso exclusivamente residencial, anuência expressa dos vizinhos e manifestação do órgão de preservação cultural quando houver."
+        severity: info
+    basis: {source: luos, ref: "Art. 91"}
+
+  - code: recuo-fundo-maioracao-zcor
+    title: "Recuo de fundo mínimo na majoração do art. 91"
+    message: "Recuo de fundo mínimo de 5,00 m para os lotes que utilizarem a majoração do art. 91."
+    severity: attention
+    applies_to_zones: [ZCOR-2, ZCOR-3, ZCORa]
+    when: {uses_art91: true}
+    effects:
+      - type: override_param
+        param: setback_side_back
+        value: 5
+        message: "Recuo de fundo mínimo de 5,00 m (nota (n) do Quadro 3), quando utilizada a majoração do art. 91."
+    basis: {source: quadro3, ref: "Nota (n) do Quadro 3"}
+
+  - code: zonas-recepcionam-parametros
+    title: "Zonas que recepcionam parâmetros de outras zonas"
+    message: "ZEUP e ZEUPa recepcionam automaticamente os parâmetros de ZEU e ZEUa quando atendidos os requisitos do art. 83 da Lei nº 16.050/2014."
+    severity: info
+    applies_to_zones: [ZEUP, ZEUPa]
+    effects:
+      - type: warning
+        title: "Recepção de parâmetros (notas (b) e (c) do Quadro 3)"
+        message: "Atendidos os requisitos do art. 83 da Lei nº 16.050/2014 (PDE), a zona ZEUP recepciona automaticamente os parâmetros da zona ZEU e a ZEUPa os da ZEUa."
+        severity: info
+    basis: {source: quadro3, ref: "Notas (b) e (c) do Quadro 3"}
+
+  - code: area-mananciais
+    title: "Zonas em área de proteção e recuperação aos mananciais"
+    message: "Aplicar a legislação estadual pertinente, quando mais restritiva (nota (a) do Quadro 3)."
+    severity: info
+    effects:
+      - type: warning
+        title: "Legislação estadual de mananciais"
+        message: "Nas zonas inseridas na área de proteção e recuperação aos mananciais aplica-se a legislação estadual pertinente, quando mais restritiva (art. 5º, § 2º da Lei nº 16.402/2016)."
+        severity: info
+    basis: {source: quadro3, ref: "Nota (a) do Quadro 3 e art. 5º, § 2º"}
+
+  - code: incremento-ca-educacao-saude-hotel
+    title: "Majoração do CA para ensino, saúde e hotelaria"
+    message: "CA máximo majorado em 50% para ensino, saúde e hotéis em ZEU, ZEUa, ZEUP, ZEUPa e ZC."
+    severity: info
+    applies_to_zones: [ZEU, ZEUa, ZEUP, ZEUPa, ZC, ZCa]
+    when: {use: {in: [ensino, saude, hotel]}}
+    effects:
+      - type: warning
+        title: "CA majorado (art. 62, parágrafo único)"
+        message: "Para novas construções e reformas com ampliação de área construída de estabelecimentos de ensino, saúde e pesquisa em saúde e de hotéis localizados em ZEU, ZEUa, ZEUP, ZEUPa ou ZC, o CA máximo é majorado em 50%. Confirmar a redação vigente do art. 62 e os limites da outorga onerosa."
+        severity: info
+    basis: {source: luos, ref: "Art. 62"}
+
+  - code: perimetros-incentivo-economico
+    title: "Perímetros de incentivo ao desenvolvimento econômico"
+    message: "Nos perímetros de Jacu-Pêssego e Cupecê, verificar arts. 362 e 363 da Lei nº 16.050/2014 (nota (m) do Quadro 3)."
+    severity: info
+    effects:
+      - type: warning
+        title: "Perímetros de incentivo (nota (m) do Quadro 3)"
+        message: "Para áreas contidas nos perímetros de incentivo ao desenvolvimento econômico Jacu-Pêssego e Cupecê (Mapa 11 da Lei nº 16.050/2014), verificar o CA máximo e a outorga onerosa de potencial construtivo adicional (arts. 362 e 363 do PDE)."
+        severity: info
+    basis: {source: quadro3, ref: "Nota (m) do Quadro 3 e arts. 362 e 363 da Lei nº 16.050/2014"}
+
+  - code: areas-nao-computaveis
+    title: "Áreas não computáveis (garagens)"
+    message: "Ver art. 62: áreas de circulação, manobra e estacionamento de veículos podem ser não computáveis, observada a cota de garagem de 32,00 m² por vaga."
+    severity: info
+    applies_to_zones: [ZEU, ZEUa, ZEUP, ZEUPa, ZEM, ZEMP]
+    effects:
+      - type: warning
+        title: "Áreas não computáveis"
+        message: "Nas ZEU, ZEUa, ZEUP, ZEUPa, ZEM e ZEMP, são áreas não computáveis as áreas cobertas ocupadas por circulação, manobra e estacionamento de veículos, desde que observada a cota de garagem máxima de 32,00 m² por vaga e o número de vagas previsto no art. 62."
+        severity: info
+    basis: {source: luos, ref: "Art. 62"}
