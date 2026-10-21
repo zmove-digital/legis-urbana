@@ -1,0 +1,3398 @@
+# Base legal de Porto Alegre.
+# Fonte: Lei Complementar nº 1.076/2026 (LUOS) e Anexo 2 (quadros por ZOT),
+# no portal de legislação da Prefeitura de Porto Alegre
+# (https://legislacao.portoalegre.rs.gov.br/norma/51486).
+# Arquivo gerado a partir da leitura dos PDFs oficiais; revisar a cada
+# atualização da lei (ver docs/BASE_LEGAL.md).
+slug: porto-alegre
+name: Porto Alegre
+uf: RS
+ibge: '4314902'
+is_demo: false
+description: Porto Alegre - Lei Complementar nº 1.076/2026 (LUOS) e Lei Complementar nº 1.075/2026 (Plano
+  Diretor Urbano Sustentavel). O regime urbanistico de cada Zona de Ordenamento Territorial (ZOT) esta
+  no Anexo 2 da LC 1076/2026, que establish coeficiente de aproveitamento basico e maximo, altura maxima,
+  recuo de jardim, afastamentos laterais e de fundos (18% da altura acima de 12,50 m), taxa de permeabilidade
+  e fator de conversao.
+zone_selection:
+  method: manual
+  hint: A ZOT e o eventual sub-setor sao identificados no mapa oficial de zoneamento (Anexo 1 da LC 1076/2026,
+    fl. 1), constante do anexo da lei no link indicado abaixo. As ZOTs 8.1, 8.2 e 8.3 tem sub-setores
+    identificados por letra no desenho do Anexo 2 correspondente.
+  helper_url: https://legislacao.portoalegre.rs.gov.br/media/sapl/public/anexonormajuridica/2026/1420/lc1076a.pdf
+sources:
+- key: luos
+  kind: lei
+  number: '1.076'
+  year: 2026
+  title: Lei Complementar nº 1.076/2026 - Parcelamento, uso e ocupacao do solo em Porto Alegre (LUOS)
+  url: https://legislacao.portoalegre.rs.gov.br/norma/51486
+  consolidated_as_of: '2026-07-14'
+  retrieved_at: '2026-10-21'
+  notes: Texto publicado em 14/07/2026, baixado do portal de legislacao da Prefeitura de Porto Alegre
+    (norma 51486) em 21/10/2026. Arts. 24, 26, 73, 74, 75 a 84 e 108 a 111 fundamentam as regras condicionais
+    cadastradas.
+- key: luos_anexo2
+  kind: anexo
+  number: '2'
+  year: 2026
+  title: Lei Complementar nº 1.076/2026 - Anexo 2 (quadros de regime urbanistico por ZOT)
+  url: https://legislacao.portoalegre.rs.gov.br/media/sapl/public/anexonormajuridica/2026/1420/lc1076a.pdf
+  consolidated_as_of: '2026-07-14'
+  retrieved_at: '2026-10-21'
+  notes: Anexo 2 da LC 1076/2026 (fls. 1 a 54), com os quadros de parcelamento do solo e de edificacoes
+    (coeficiente de aproveitamento, volumetria, taxa de permeabilidade e atividades) de cada ZOT, inclusive
+    os sub-setores das ZOTs 8.1, 8.2 e 8.3. O Anexo 1 (mapa de zoneamento) segue a partir da fl. 55 do
+    mesmo arquivo.
+- key: pdus
+  kind: lei
+  number: '1.075'
+  year: 2026
+  title: Lei Complementar nº 1.075/2026 - Plano Diretor Urbano Sustentavel de Porto Alegre
+  url: https://legislacao.portoalegre.rs.gov.br/norma/51485
+  retrieved_at: '2026-10-21'
+  notes: Fonte de referencia do macrozoneamento e das finalidades das ZOTs (art. 4 da LC 1076/2026). Nao
+    fundamenta parametro numerico cadastrado nesta base legal.
+questions:
+- key: lot_area
+  label: Area do lote
+  type: number
+  required: true
+  unit: m2
+  help: Area do terreno considerada para o regime urbanistico (art. 24 da LC 1076/2026).
+- key: footprint_area
+  label: Area de implantacao (por pavimento terreo)
+  type: number
+  unit: m2
+  help: Area ocupada pela edificacao no pavimento terreo.
+- key: total_built_area
+  label: Area total construida
+  type: number
+  required: true
+  unit: m2
+  help: Somatoria da area construida de todos os pavimentos.
+- key: area_isenta_ca
+  label: Area construida isenta de contabilizacao no coeficiente de aproveitamento
+  type: number
+  unit: m2
+  help: Soma das areas isentas do art. 73 da LC 1076/2026 (garagem e circulacoes, residencia unifamiliar
+    com ate 2 unidades, area economica vinculada a habitacao unifamiliar, areas de imoveis tombados, fachada
+    ativa, galerias de uso publico, unidades de triagem de residuos, construcoes auxiliares no recuo de
+    jardim e balanco, beirais, floreiras e abas).
+- key: use
+  label: Uso pretendido
+  type: select
+  required: true
+  options:
+  - residencial
+  - comercial
+  - misto
+  - servicos
+  - industrial
+  - institucional
+- key: floors
+  label: Numero de pavimentos
+  type: number
+  unit: pavimentos
+- key: floor_height
+  label: Pe-direito medio
+  type: number
+  unit: m
+  default: 3.0
+  help: Usado para estimar a altura da edificacao quando nao informada a altura.
+- key: building_height
+  label: Altura da edificacao (acima da Referencia de Nivel)
+  type: derived
+  unit: m
+  derivations:
+  - fact: building_height
+    op: mul
+    args:
+    - floors
+    - floor_height
+  help: Informada pelo responsavel tecnico. Se deixada em branco, e calculada pelo numero de pavimentos
+    vezes o pe-direito medio.
+- key: proposed_setback_front
+  label: Recuo frontal proposto (recuo de jardim)
+  type: number
+  unit: m
+- key: proposed_setback_side
+  label: Afastamento lateral proposto
+  type: number
+  unit: m
+- key: proposed_setback_back
+  label: Afastamento de fundo proposto
+  type: number
+  unit: m
+- key: permeable_area
+  label: Area permeavel proposta
+  type: number
+  unit: m2
+  help: Area que permanece livre de pavimentacao ou construcao (art. 75, I). Nao computam as areas construidas
+    do art. 73, inc. IX, marquises e acessos cobertos (art. 76, paragrafo 2).
+- key: via_arterial
+  label: A testada do lote esta em via estruturante ou arterial?
+  type: boolean
+  help: Define o recuo de jardim nas ZOTs 14, 15 e 16 (4 m ou 12 m).
+- key: terreno_origem_parcelamento
+  label: O terreno tem origem em parcelamento do solo aprovado pelo Municipio?
+  type: boolean
+  help: Condiciona a reducao de 50% do coeficiente de aproveitamento (art. 24, paragrafo 4, III).
+- key: parcelamento_equipamentos
+  label: O parcelamento de origem destinou areas para equipamentos comunitarios?
+  type: boolean
+  help: Quando verdadeiro, o coeficiente de aproveitamento pode incidir sobre a area total do terreno,
+    e nao sobre o Modulo de Fracionamento (art. 24, paragrafo 4, II).
+- key: his
+  label: O empreendimento e Habitacao de Interesse Social (HIS)?
+  type: boolean
+  help: Na ZOT 14, o regime da ZOT 1 pode ser adotado para HIS (art. 19, paragrafo 2).
+- key: regime_4d
+  label: Adota o Regime Especial +4D (ZOT 8.2 - Floresta / Sao Geraldo)?
+  type: boolean
+  help: Habilita o coeficiente de aproveitamento basico 7,5 e maximo 13, mediante a pontuacao minima do
+    Anexo 2.8.2, fl. 3 (art. 74).
+- key: centro_historico
+  label: O terreno esta localizado no Centro Historico?
+  type: boolean
+  help: A taxa de permeabilidade e dispensada nos terrenos do Centro Historico (art. 79, IV).
+- key: atividade_incompativel
+  label: A atividade pretendida e incompativel com areas permeaveis?
+  type: boolean
+  help: Posto de combustiveis, unidades industriais, centro de logistica e distribuicao, unidades de triagem
+    e destinacao final de residuos solidos (art. 79, II).
+- key: ampliacao_area_edificada
+  label: Aumento, reforma ou reciclagem de uso incide sobre area ja edificada?
+  type: boolean
+  help: Condiciona a dispensas da taxa de permeabilidade (art. 79, I).
+- key: trazado_plano_diretor
+  label: O imovel esta atingido pelo trazado do Plano Diretor?
+  type: boolean
+  help: Define a base de calculo do coeficiente de aproveitamento e da TP (art. 26).
+- key: imovel_multiplas_zots
+  label: O imovel esta inserido em mais de uma ZOT?
+  type: boolean
+  help: O regime urbanistico passa a ser determinado proporcionalmente a area correspondente a cada ZOT
+    (art. 24, paragrafo 3), exceto quando envolver a ZOT 15 ou a ZOT 16.
+- key: rooftop
+  label: O projeto preve area de lazer em cobertura (rooftop)?
+  type: boolean
+  help: Permite acrescimo de ate 4 m na altura maxima (art. 81, paragrafo 2, I).
+- key: bem_tombado
+  label: O projeto promove a preservacao de bem tombado ou inventariado no proprio terreno?
+  type: boolean
+  help: Permite acrescimo de ate 9 m na altura maxima, fora das ZOTs 1 e 2 (art. 81, paragrafo 2, II).
+zones:
+- code: ZOT 1
+  name: Predominancia residencial de baixa transformacao
+  description: Regime urbanistico da ZOT 1 conforme art. 6 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: null
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.1.
+      - 'O art. 24, paragrafo 4, III reduz em 50% ''o coeficiente de aproveitamento'' no terreno com area
+        de ate 22.500 m2, sem origem em parcelamento do solo aprovado pelo Municipio, localizado nas ZOTs
+        1 e 2. O texto nao distingue entre o coeficiente basico e o maximo: a reducao foi aplicada a ambos,
+        para que o basico nao supere o maximo. Confirmar o tratamento com o orgao competente.'
+      alternatives:
+      - when:
+          use:
+            eq: residencial
+          lot_area:
+            lte: 22500
+          terreno_origem_parcelamento:
+            eq: false
+        value: 0.75
+        message: 'Coeficiente reduzido em 50%: terreno com area de ate 22.500 m2 sem origem em parcelamento
+          do solo aprovado pelo Municipio (art. 24, paragrafo 4, III).'
+        basis: &id001
+          source: luos
+          ref: art. 6
+      - when:
+          use:
+            eq: residencial
+          lot_area:
+            lte: 22500
+          terreno_origem_parcelamento:
+            eq: true
+        message: 'Coeficiente de aproveitamento integral (art. 24, paragrafo 4): o terreno tem origem
+          em parcelamento do solo aprovado pelo Municipio.'
+        value: 1.5
+        basis: *id001
+      - when:
+          use:
+            eq: residencial
+          lot_area:
+            gt: 22500
+        message: Coeficiente de aproveitamento integral (art. 24, paragrafo 4).
+        value: 1.5
+        basis: *id001
+      - when:
+          use:
+            ne: residencial
+        message: 'Coeficiente de aproveitamento integral: para atividades de uso nao residencial o coeficiente
+          incide sobre toda a area do terreno (art. 24, paragrafo 5).'
+        value: 1.5
+        basis: *id001
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: null
+      basis: &id002
+        source: luos_anexo2
+        ref: Anexo 2.1
+      alternatives:
+      - when:
+          use:
+            eq: residencial
+          lot_area:
+            lte: 22500
+          terreno_origem_parcelamento:
+            eq: false
+        value: 1.25
+        message: 'Coeficiente reduzido em 50%: terreno com area de ate 22.500 m2 sem origem em parcelamento
+          do solo aprovado pelo Municipio (art. 24, paragrafo 4, III).'
+        basis: *id001
+      - when:
+          use:
+            eq: residencial
+          lot_area:
+            lte: 22500
+          terreno_origem_parcelamento:
+            eq: true
+        message: 'Coeficiente de aproveitamento integral (art. 24, paragrafo 4): o terreno tem origem
+          em parcelamento do solo aprovado pelo Municipio.'
+        value: 2.5
+        basis: *id001
+      - when:
+          use:
+            eq: residencial
+          lot_area:
+            gt: 22500
+        message: Coeficiente de aproveitamento integral (art. 24, paragrafo 4).
+        value: 2.5
+        basis: *id001
+      - when:
+          use:
+            ne: residencial
+        message: 'Coeficiente de aproveitamento integral: para atividades de uso nao residencial o coeficiente
+          incide sobre toda a area do terreno (art. 24, paragrafo 5).'
+        value: 2.5
+        basis: *id001
+      notes:
+      - 'O art. 24, paragrafo 4, III reduz em 50% ''o coeficiente de aproveitamento'' no terreno com area
+        de ate 22.500 m2, sem origem em parcelamento do solo aprovado pelo Municipio, localizado nas ZOTs
+        1 e 2. O texto nao distingue entre o coeficiente basico e o maximo: a reducao foi aplicada a ambos,
+        para que o basico nao supere o maximo. Confirmar o tratamento com o orgao competente.'
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+        denominator_cap: 3000
+        denominator_cap_when:
+          use:
+            eq: residencial
+        denominator_cap_exempt_when:
+          parcelamento_equipamentos:
+            eq: true
+    max_height:
+      label: Altura maxima da edificacao
+      value: 9
+      unit: m
+      basis: *id002
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id002
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: null
+      unit: '%'
+      basis: *id002
+      notes:
+      - AFASTAMENTO LATERAL ISENTO no Anexo 2.1.
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: null
+      unit: '%'
+      basis: *id002
+      notes:
+      - AFASTAMENTO DE FUNDOS ISENTO no Anexo 2.1.
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 30
+      unit: '%'
+      basis: *id002
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 30
+        - pct: 40
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 30% sobre os primeiros 1.500 m2 e 40% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.1).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 30
+      unit: '%'
+      basis: *id002
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 150
+      unit: m2
+      basis: *id002
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id002
+- code: ZOT 2
+  name: Predominancia residencial de baixa volumetria
+  description: Regime urbanistico da ZOT 2 conforme art. 7 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: null
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.2.
+      - 'O art. 24, paragrafo 4, III reduz em 50% ''o coeficiente de aproveitamento'' no terreno com area
+        de ate 22.500 m2, sem origem em parcelamento do solo aprovado pelo Municipio, localizado nas ZOTs
+        1 e 2. O texto nao distingue entre o coeficiente basico e o maximo: a reducao foi aplicada a ambos,
+        para que o basico nao supere o maximo. Confirmar o tratamento com o orgao competente.'
+      alternatives:
+      - when:
+          use:
+            eq: residencial
+          lot_area:
+            lte: 22500
+          terreno_origem_parcelamento:
+            eq: false
+        value: 1.0
+        message: 'Coeficiente reduzido em 50%: terreno com area de ate 22.500 m2 sem origem em parcelamento
+          do solo aprovado pelo Municipio (art. 24, paragrafo 4, III).'
+        basis: &id003
+          source: luos
+          ref: art. 7
+      - when:
+          use:
+            eq: residencial
+          lot_area:
+            lte: 22500
+          terreno_origem_parcelamento:
+            eq: true
+        message: 'Coeficiente de aproveitamento integral (art. 24, paragrafo 4): o terreno tem origem
+          em parcelamento do solo aprovado pelo Municipio.'
+        value: 2
+        basis: *id003
+      - when:
+          use:
+            eq: residencial
+          lot_area:
+            gt: 22500
+        message: Coeficiente de aproveitamento integral (art. 24, paragrafo 4).
+        value: 2
+        basis: *id003
+      - when:
+          use:
+            ne: residencial
+        message: 'Coeficiente de aproveitamento integral: para atividades de uso nao residencial o coeficiente
+          incide sobre toda a area do terreno (art. 24, paragrafo 5).'
+        value: 2
+        basis: *id003
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: null
+      basis: &id004
+        source: luos_anexo2
+        ref: Anexo 2.2
+      alternatives:
+      - when:
+          use:
+            eq: residencial
+          lot_area:
+            lte: 22500
+          terreno_origem_parcelamento:
+            eq: false
+        value: 1.5
+        message: 'Coeficiente reduzido em 50%: terreno com area de ate 22.500 m2 sem origem em parcelamento
+          do solo aprovado pelo Municipio (art. 24, paragrafo 4, III).'
+        basis: *id003
+      - when:
+          use:
+            eq: residencial
+          lot_area:
+            lte: 22500
+          terreno_origem_parcelamento:
+            eq: true
+        message: 'Coeficiente de aproveitamento integral (art. 24, paragrafo 4): o terreno tem origem
+          em parcelamento do solo aprovado pelo Municipio.'
+        value: 3
+        basis: *id003
+      - when:
+          use:
+            eq: residencial
+          lot_area:
+            gt: 22500
+        message: Coeficiente de aproveitamento integral (art. 24, paragrafo 4).
+        value: 3
+        basis: *id003
+      - when:
+          use:
+            ne: residencial
+        message: 'Coeficiente de aproveitamento integral: para atividades de uso nao residencial o coeficiente
+          incide sobre toda a area do terreno (art. 24, paragrafo 5).'
+        value: 3
+        basis: *id003
+      notes:
+      - 'O art. 24, paragrafo 4, III reduz em 50% ''o coeficiente de aproveitamento'' no terreno com area
+        de ate 22.500 m2, sem origem em parcelamento do solo aprovado pelo Municipio, localizado nas ZOTs
+        1 e 2. O texto nao distingue entre o coeficiente basico e o maximo: a reducao foi aplicada a ambos,
+        para que o basico nao supere o maximo. Confirmar o tratamento com o orgao competente.'
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+        denominator_cap: 3000
+        denominator_cap_when:
+          use:
+            eq: residencial
+        denominator_cap_exempt_when:
+          parcelamento_equipamentos:
+            eq: true
+    max_height:
+      label: Altura maxima da edificacao
+      value: 9
+      unit: m
+      basis: *id004
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id004
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: null
+      unit: '%'
+      basis: *id004
+      notes:
+      - AFASTAMENTO LATERAL ISENTO no Anexo 2.2.
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: null
+      unit: '%'
+      basis: *id004
+      notes:
+      - AFASTAMENTO DE FUNDOS ISENTO no Anexo 2.2.
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 30
+      unit: '%'
+      basis: *id004
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 30
+        - pct: 40
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 30% sobre os primeiros 1.500 m2 e 40% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.2).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id004
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 150
+      unit: m2
+      basis: *id004
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id004
+- code: ZOT 3
+  name: Baixa volumetria com potencial de adensamento
+  description: Regime urbanistico da ZOT 3 conforme art. 8 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 2
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.3.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 3
+      basis: &id005
+        source: luos_anexo2
+        ref: Anexo 2.3
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 12.5
+      unit: m
+      basis: *id005
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id005
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: null
+      unit: '%'
+      basis: *id005
+      notes:
+      - AFASTAMENTO LATERAL ISENTO no Anexo 2.3.
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: null
+      unit: '%'
+      basis: *id005
+      notes:
+      - AFASTAMENTO DE FUNDOS ISENTO no Anexo 2.3.
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 20
+      unit: '%'
+      basis: *id005
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 20
+        - pct: 30
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 20% sobre os primeiros 1.500 m2 e 30% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.3).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id005
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id005
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id005
+- code: ZOT 4
+  name: Diversidade de padroes volumetricos
+  description: Regime urbanistico da ZOT 4 conforme art. 9 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 2
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.4.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 4
+      basis: &id006
+        source: luos_anexo2
+        ref: Anexo 2.4
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 18
+      unit: m
+      basis: *id006
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id006
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id006
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id006
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 20
+      unit: '%'
+      basis: *id006
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 20
+        - pct: 30
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 20% sobre os primeiros 1.500 m2 e 30% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.4).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id006
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id006
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id006
+- code: ZOT 5
+  name: Diversidade de padroes volumetricos
+  description: Regime urbanistico da ZOT 5 conforme art. 10 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 2.4
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.5.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 4
+      basis: &id007
+        source: luos_anexo2
+        ref: Anexo 2.5
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 33
+      unit: m
+      basis: *id007
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id007
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id007
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id007
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 10
+      unit: '%'
+      basis: *id007
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 10
+        - pct: 20
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 10% sobre os primeiros 1.500 m2 e 20% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.5).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id007
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id007
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id007
+- code: ZOT 6
+  name: Diversidade de padroes volumetricos com potencial de adensamento
+  description: Regime urbanistico da ZOT 6 conforme art. 11 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 2.4
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.6.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 5
+      basis: &id008
+        source: luos_anexo2
+        ref: Anexo 2.6
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 42
+      unit: m
+      basis: *id008
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id008
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id008
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id008
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 10
+      unit: '%'
+      basis: *id008
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 10
+        - pct: 20
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 10% sobre os primeiros 1.500 m2 e 20% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.6).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id008
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id008
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id008
+- code: ZOT 7
+  name: Processo significativo de transformacao urbana
+  description: Regime urbanistico da ZOT 7 conforme art. 12 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 2.4
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.7.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 6.5
+      basis: &id009
+        source: luos_anexo2
+        ref: Anexo 2.7
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 60
+      unit: m
+      basis: *id009
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id009
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id009
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id009
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 10
+      unit: '%'
+      basis: *id009
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 10
+        - pct: 20
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 10% sobre os primeiros 1.500 m2 e 20% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.7).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id009
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id009
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id009
+- code: ZOT 8
+  name: Vinculada a planos e projetos estrategicos de desenvolvimento urbano
+  description: Regime urbanistico da ZOT 8 conforme art. 13 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 2.4
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.8.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 7.5
+      basis: &id010
+        source: luos_anexo2
+        ref: Anexo 2.8
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 90
+      unit: m
+      basis: *id010
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id010
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id010
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id010
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 10
+      unit: '%'
+      basis: *id010
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 10
+        - pct: 20
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 10% sobre os primeiros 1.500 m2 e 20% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.8).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id010
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id010
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id010
+- code: ZOT 9
+  name: Alto grau de miscigenacao de atividades
+  description: Regime urbanistico da ZOT 9 conforme art. 14 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 2
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.9.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 4
+      basis: &id011
+        source: luos_anexo2
+        ref: Anexo 2.9
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 18
+      unit: m
+      basis: *id011
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id011
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id011
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id011
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 10
+      unit: '%'
+      basis: *id011
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 10
+        - pct: 20
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 10% sobre os primeiros 1.500 m2 e 20% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.9).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id011
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id011
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id011
+- code: ZOT 10
+  name: Alto grau de miscigenacao de atividades
+  description: Regime urbanistico da ZOT 10 conforme art. 15 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 2.4
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.10.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 4
+      basis: &id012
+        source: luos_anexo2
+        ref: Anexo 2.10
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 33
+      unit: m
+      basis: *id012
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id012
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id012
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id012
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 10
+      unit: '%'
+      basis: *id012
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 10
+        - pct: 20
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 10% sobre os primeiros 1.500 m2 e 20% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.10).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id012
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id012
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id012
+- code: ZOT 11
+  name: Areas passiveis de estruturacao ou requalificacao urbana
+  description: Regime urbanistico da ZOT 11 conforme art. 16 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 2.4
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.11.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 5
+      basis: &id013
+        source: luos_anexo2
+        ref: Anexo 2.11
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 42
+      unit: m
+      basis: *id013
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id013
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id013
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id013
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 10
+      unit: '%'
+      basis: *id013
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 10
+        - pct: 20
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 10% sobre os primeiros 1.500 m2 e 20% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.11).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id013
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id013
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id013
+- code: ZOT 12
+  name: Localizacao estrategica proxima a centralidades e polos de desenvolvimento
+  description: Regime urbanistico da ZOT 12 conforme art. 17 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 3.0
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.12.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 6.5
+      basis: &id014
+        source: luos_anexo2
+        ref: Anexo 2.12
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 60
+      unit: m
+      basis: *id014
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id014
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id014
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id014
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 10
+      unit: '%'
+      basis: *id014
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 10
+        - pct: 20
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 10% sobre os primeiros 1.500 m2 e 20% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.12).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id014
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id014
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id014
+- code: ZOT 13
+  name: Vinculada a planos e projetos promotores de desenvolvimento urbano
+  description: Regime urbanistico da ZOT 13 conforme art. 18 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 3.0
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.13.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 6.5
+      basis: &id015
+        source: luos_anexo2
+        ref: Anexo 2.13
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 60
+      unit: m
+      basis: *id015
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id015
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id015
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id015
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 10
+      unit: '%'
+      basis: *id015
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 10
+        - pct: 20
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 10% sobre os primeiros 1.500 m2 e 20% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.13).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id015
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id015
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id015
+- code: ZOT 14
+  name: Entre areas urbanizadas e nao urbanizadas
+  description: Regime urbanistico da ZOT 14 conforme art. 19 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 0.5
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.14.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: null
+      basis: &id016
+        source: luos_anexo2
+        ref: Anexo 2.14
+      check:
+        type: manual
+      notes:
+      - 'O Anexo 2.14 nao fixa coefficiente maximo numerico: consta ''Ajuste (4) / TDC (5)'', isto e,
+        ajuste para compatibilizacao com atividade pre-existente ou Transferencia do Direito de Construir
+        do proprio terreno. Definir caso a caso.'
+    max_height:
+      label: Altura maxima da edificacao
+      value: 9
+      unit: m
+      basis: *id016
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: null
+      unit: m
+      basis: *id016
+      check:
+        type: gte
+        field: proposed_setback_front
+      alternatives:
+      - when:
+          via_arterial:
+            eq: true
+        value: 12
+        message: Recuo de jardim de 12 m em vias estruturantes ou arteriais.
+        basis: *id016
+      - when:
+          via_arterial:
+            eq: false
+        value: 4
+        message: Recuo de jardim de 4 m.
+        basis: *id016
+      notes:
+      - Recuo de jardim de 12 m em vias estruturantes ou arteriais.
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id016
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id016
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 40
+      unit: '%'
+      basis: *id016
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 40
+        - pct: 60
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 40% sobre os primeiros 1.500 m2 e 60% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.14).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 20
+      unit: '%'
+      basis: *id016
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 20000
+      unit: m2
+      basis: *id016
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 50
+      unit: m
+      basis: *id016
+- code: ZOT 15
+  name: Presenca significativa de bens naturais essenciais
+  description: Regime urbanistico da ZOT 15 conforme art. 20 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 0.3
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.15.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: null
+      basis: &id017
+        source: luos_anexo2
+        ref: Anexo 2.15
+      check:
+        type: manual
+      notes:
+      - 'O Anexo 2.15 nao fixa coefficiente maximo numerico: consta ''Ajuste (4) / TDC (5)'', isto e,
+        ajuste para compatibilizacao com atividade pre-existente ou Transferencia do Direito de Construir
+        do proprio terreno. Definir caso a caso.'
+    max_height:
+      label: Altura maxima da edificacao
+      value: 9
+      unit: m
+      basis: *id017
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: null
+      unit: m
+      basis: *id017
+      check:
+        type: gte
+        field: proposed_setback_front
+      alternatives:
+      - when:
+          via_arterial:
+            eq: true
+        value: 12
+        message: Recuo de jardim de 12 m em vias estruturantes ou arteriais.
+        basis: *id017
+      - when:
+          via_arterial:
+            eq: false
+        value: 4
+        message: Recuo de jardim de 4 m.
+        basis: *id017
+      notes:
+      - Recuo de jardim de 12 m em vias estruturantes ou arteriais.
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id017
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id017
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 50
+      unit: '%'
+      basis: *id017
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 50
+        - pct: 70
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 50% sobre os primeiros 1.500 m2 e 70% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.15).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 20
+      unit: '%'
+      basis: *id017
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 20000
+      unit: m2
+      basis: *id017
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 50
+      unit: m
+      basis: *id017
+- code: ZOT 16
+  name: Zona de Ordenamento Territorial 16
+  description: Regime urbanistico da ZOT 16 conforme art. 21 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 0.3
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.16.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: null
+      basis: &id018
+        source: luos_anexo2
+        ref: Anexo 2.16
+      check:
+        type: manual
+      notes:
+      - O Anexo 2.16 nao fixa coefficiente maximo numerico (consta '-'). Definir caso a caso com o orgao
+        competente.
+    max_height:
+      label: Altura maxima da edificacao
+      value: 9
+      unit: m
+      basis: *id018
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: null
+      unit: m
+      basis: *id018
+      check:
+        type: gte
+        field: proposed_setback_front
+      alternatives:
+      - when:
+          via_arterial:
+            eq: true
+        value: 12
+        message: Recuo de jardim de 12 m em vias estruturantes ou arteriais.
+        basis: *id018
+      - when:
+          via_arterial:
+            eq: false
+        value: 4
+        message: Recuo de jardim de 4 m.
+        basis: *id018
+      notes:
+      - Recuo de jardim de 12 m em vias estruturantes ou arteriais.
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id018
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id018
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 50
+      unit: '%'
+      basis: *id018
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 50
+        - pct: 70
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 50% sobre os primeiros 1.500 m2 e 70% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.16).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 20
+      unit: '%'
+      basis: *id018
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 20000
+      unit: m2
+      basis: *id018
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 50
+      unit: m
+      basis: *id018
+- code: ZOT 8.1A
+  name: Centro Historico - Entorno Gasometro
+  description: Regime urbanistico da ZOT 8.1A conforme art. 13 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 3.6
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.8.1, fl. 2.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 6.5
+      basis: &id019
+        source: luos_anexo2
+        ref: Anexo 2.8.1, fl. 2
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 60
+      unit: m
+      basis: *id019
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: null
+      unit: m
+      basis: *id019
+      notes:
+      - RECUO DE JARDIM ISENTO no Anexo 2.8.1.
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: null
+      unit: '%'
+      basis: *id019
+      notes:
+      - AFASTAMENTO LATERAL ISENTO no Anexo 2.8.1.
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id019
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: null
+      unit: '%'
+      basis: *id019
+      notes:
+      - TAXA DE PERMEABILIDADE ISENTA no Anexo 2.8.1.
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: null
+      unit: '%'
+      basis: *id019
+      notes:
+      - 'Fator de conversao nao aplicavel: a taxa de permeabilidade e isenta nesta ZOT (Anexo 2).'
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id019
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id019
+  group: ZOT 8.1 - Centro Historico
+- code: ZOT 8.1B
+  name: Centro Historico - Transicao
+  description: Regime urbanistico da ZOT 8.1B conforme art. 13 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 3.6
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.8.1, fl. 2.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 7
+      basis: &id020
+        source: luos_anexo2
+        ref: Anexo 2.8.1, fl. 2
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 75
+      unit: m
+      basis: *id020
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: null
+      unit: m
+      basis: *id020
+      notes:
+      - RECUO DE JARDIM ISENTO no Anexo 2.8.1.
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: null
+      unit: '%'
+      basis: *id020
+      notes:
+      - AFASTAMENTO LATERAL ISENTO no Anexo 2.8.1.
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id020
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: null
+      unit: '%'
+      basis: *id020
+      notes:
+      - TAXA DE PERMEABILIDADE ISENTA no Anexo 2.8.1.
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: null
+      unit: '%'
+      basis: *id020
+      notes:
+      - 'Fator de conversao nao aplicavel: a taxa de permeabilidade e isenta nesta ZOT (Anexo 2).'
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id020
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id020
+  group: ZOT 8.1 - Centro Historico
+- code: ZOT 8.1C
+  name: Centro Historico - Borges de Medeiros
+  description: Regime urbanistico da ZOT 8.1C conforme art. 13 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 3.6
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.8.1, fl. 2.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 7.5
+      basis: &id021
+        source: luos_anexo2
+        ref: Anexo 2.8.1, fl. 2
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 90
+      unit: m
+      basis: *id021
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: null
+      unit: m
+      basis: *id021
+      notes:
+      - RECUO DE JARDIM ISENTO no Anexo 2.8.1.
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: null
+      unit: '%'
+      basis: *id021
+      notes:
+      - AFASTAMENTO LATERAL ISENTO no Anexo 2.8.1.
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id021
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: null
+      unit: '%'
+      basis: *id021
+      notes:
+      - TAXA DE PERMEABILIDADE ISENTA no Anexo 2.8.1.
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: null
+      unit: '%'
+      basis: *id021
+      notes:
+      - 'Fator de conversao nao aplicavel: a taxa de permeabilidade e isenta nesta ZOT (Anexo 2).'
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id021
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id021
+  group: ZOT 8.1 - Centro Historico
+- code: ZOT 8.1D
+  name: Centro Historico - Siqueira Campos
+  description: Regime urbanistico da ZOT 8.1D conforme art. 13 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 3.6
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.8.1, fl. 2.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 11.5
+      basis: &id022
+        source: luos_anexo2
+        ref: Anexo 2.8.1, fl. 2
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 100
+      unit: m
+      basis: *id022
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: null
+      unit: m
+      basis: *id022
+      notes:
+      - RECUO DE JARDIM ISENTO no Anexo 2.8.1.
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: null
+      unit: '%'
+      basis: *id022
+      notes:
+      - AFASTAMENTO LATERAL ISENTO no Anexo 2.8.1.
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id022
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: null
+      unit: '%'
+      basis: *id022
+      notes:
+      - TAXA DE PERMEABILIDADE ISENTA no Anexo 2.8.1.
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: null
+      unit: '%'
+      basis: *id022
+      notes:
+      - 'Fator de conversao nao aplicavel: a taxa de permeabilidade e isenta nesta ZOT (Anexo 2).'
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id022
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id022
+  group: ZOT 8.1 - Centro Historico
+- code: ZOT 8.1E
+  name: Centro Historico - Voluntarios da Patria
+  description: Regime urbanistico da ZOT 8.1E conforme art. 13 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 3.6
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.8.1E, fl. 3.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 11.5
+      basis: &id023
+        source: luos_anexo2
+        ref: Anexo 2.8.1E, fl. 3
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 130
+      unit: m
+      basis: *id023
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: null
+      unit: m
+      basis: *id023
+      notes:
+      - RECUO DE JARDIM ISENTO no Anexo 2.8.1.
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: null
+      unit: '%'
+      basis: *id023
+      notes:
+      - AFASTAMENTO LATERAL ISENTO no Anexo 2.8.1.
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id023
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: null
+      unit: '%'
+      basis: *id023
+      notes:
+      - TAXA DE PERMEABILIDADE ISENTA no Anexo 2.8.1.
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: null
+      unit: '%'
+      basis: *id023
+      notes:
+      - 'Fator de conversao nao aplicavel: a taxa de permeabilidade e isenta nesta ZOT (Anexo 2).'
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id023
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id023
+  group: ZOT 8.1 - Centro Historico
+- code: ZOT 8.1F
+  name: Centro Historico - Cais Maua
+  description: Regime urbanistico da ZOT 8.1F conforme art. 13 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 1.15
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.8.1F, fl. 3.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: null
+      basis: &id024
+        source: luos_anexo2
+        ref: Anexo 2.8.1F, fl. 3
+      check:
+        type: manual
+      notes:
+      - O Anexo 2.8.1 nao fixa coefficiente maximo numerico (consta '-') para o setor Cais Maua. Definir
+        caso a caso.
+    max_height:
+      label: Altura maxima da edificacao
+      value: 6.7
+      unit: m
+      basis: *id024
+      check:
+        type: lte
+        field: building_height
+      notes:
+      - Altura de 6,7 m corresponde as bases dos oitoes dos armazens (Anexo 2.8.1).
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: null
+      unit: m
+      basis: *id024
+      notes:
+      - RECUO DE JARDIM ISENTO no Anexo 2.8.1.
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: null
+      unit: '%'
+      basis: *id024
+      notes:
+      - AFASTAMENTO LATERAL ISENTO no Anexo 2.8.1.
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: null
+      unit: '%'
+      basis: *id024
+      notes:
+      - AFASTAMENTO DE FUNDOS ISENTO no Anexo 2.8.1.
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: null
+      unit: '%'
+      basis: *id024
+      notes:
+      - TAXA DE PERMEABILIDADE ISENTO no Anexo 2.8.1.
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: null
+      unit: '%'
+      basis: *id024
+      notes:
+      - 'Fator de conversao nao aplicavel: a taxa de permeabilidade e isenta nesta ZOT (Anexo 2).'
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id024
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id024
+  group: ZOT 8.1 - Centro Historico
+- code: ZOT 8.1G
+  name: Centro Historico - Sitio Historico
+  description: Regime urbanistico da ZOT 8.1G conforme art. 13 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 3.6
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.8.1G, fl. 3.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 6
+      basis: &id025
+        source: luos_anexo2
+        ref: Anexo 2.8.1G, fl. 3
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: null
+      unit: m
+      basis: *id025
+      check:
+        type: manual
+      notes:
+      - 'O Anexo 2.8.1 nao fixa altura maxima numerica: consta ''ORGANO COMPETENTE'', com as definicoes
+        previas do IPHAN ou IPHAE conforme a localizacao.'
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: null
+      unit: m
+      basis: *id025
+      notes:
+      - RECUO DE JARDIM ISENTO no Anexo 2.8.1.
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: null
+      unit: '%'
+      basis: *id025
+      check:
+        type: manual
+      notes:
+      - AFASTAMENTO LATERAL conforme definicao do orgao competente (art. 82, I).
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: null
+      unit: '%'
+      basis: *id025
+      check:
+        type: manual
+      notes:
+      - AFASTAMENTO DE FUNDOS conforme definicao do orgao competente.
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: null
+      unit: '%'
+      basis: *id025
+      notes:
+      - TAXA DE PERMEABILIDADE ISENTA no Anexo 2.8.1.
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: null
+      unit: '%'
+      basis: *id025
+      notes:
+      - 'Fator de conversao nao aplicavel: a taxa de permeabilidade e isenta nesta ZOT (Anexo 2).'
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id025
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id025
+  group: ZOT 8.1 - Centro Historico
+- code: ZOT 8.2A
+  name: 4o Distrito - Floresta / Sao Geraldo
+  description: Regime urbanistico da ZOT 8.2A conforme art. 13 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 3.6
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.8.2, fl. 2.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 7.5
+      basis: &id026
+        source: luos_anexo2
+        ref: Anexo 2.8.2, fl. 2
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 130
+      unit: m
+      basis: *id026
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id026
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id026
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id026
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 10
+      unit: '%'
+      basis: *id026
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 10
+        - pct: 20
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 10% sobre os primeiros 1.500 m2 e 20% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.8.2, fl. 2).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id026
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id026
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id026
+  group: ZOT 8.2 - 4o Distrito
+  notes:
+  - 'Setor com Regime Especial +4D: no regime comum o CA maximo e 7,5; com o Regime Especial +4D o CA
+    basico passa a 7,5 e o maximo a 13 (Anexo 2.8.2, notas 3 e 4), mediante atendimento da pontuacao minima
+    do Anexo 2.8.2, fl. 3.'
+- code: ZOT 8.2B
+  name: 4o Distrito - Farrapos / Navegantes / Humaita
+  description: Regime urbanistico da ZOT 8.2B conforme art. 13 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 3.6
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.8.2, fl. 2.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 6.5
+      basis: &id027
+        source: luos_anexo2
+        ref: Anexo 2.8.2, fl. 2
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 60
+      unit: m
+      basis: *id027
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id027
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id027
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id027
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 10
+      unit: '%'
+      basis: *id027
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 10
+        - pct: 20
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 10% sobre os primeiros 1.500 m2 e 20% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.8.2, fl. 2).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id027
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id027
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id027
+  group: ZOT 8.2 - 4o Distrito
+- code: ZOT 8.3A
+  name: Eixos Estrategicos - setor A
+  description: Regime urbanistico da ZOT 8.3A conforme art. 13 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 3.0
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.8.3, fl. 2.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 7.5
+      basis: &id028
+        source: luos_anexo2
+        ref: Anexo 2.8.3, fl. 2
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 130
+      unit: m
+      basis: *id028
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id028
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id028
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id028
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 10
+      unit: '%'
+      basis: *id028
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 10
+        - pct: 20
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 10% sobre os primeiros 1.500 m2 e 20% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.8.3, fl. 2).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id028
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id028
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id028
+  group: ZOT 8.3 - Eixos Estrategicos
+- code: ZOT 8.3B
+  name: Eixos Estrategicos - setor B
+  description: Regime urbanistico da ZOT 8.3B conforme art. 13 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 3.0
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.8.3, fl. 2.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 7.5
+      basis: &id029
+        source: luos_anexo2
+        ref: Anexo 2.8.3, fl. 2
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 90
+      unit: m
+      basis: *id029
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id029
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id029
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id029
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 10
+      unit: '%'
+      basis: *id029
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 10
+        - pct: 20
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 10% sobre os primeiros 1.500 m2 e 20% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.8.3, fl. 2).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id029
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id029
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id029
+  group: ZOT 8.3 - Eixos Estrategicos
+- code: ZOT 8.3C
+  name: Eixos Estrategicos - setor C
+  description: Regime urbanistico da ZOT 8.3C conforme art. 13 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 3.0
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.8.3, fl. 2.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 7.5
+      basis: &id030
+        source: luos_anexo2
+        ref: Anexo 2.8.3, fl. 2
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 90
+      unit: m
+      basis: *id030
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id030
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id030
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id030
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 10
+      unit: '%'
+      basis: *id030
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 10
+        - pct: 20
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 10% sobre os primeiros 1.500 m2 e 20% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.8.3, fl. 2).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id030
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id030
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id030
+  group: ZOT 8.3 - Eixos Estrategicos
+- code: ZOT 8.3D
+  name: Eixos Estrategicos - Bom Fim e Cidade Baixa
+  description: Regime urbanistico da ZOT 8.3D conforme art. 13 e Anexo 2 da LC 1076/2026.
+  params:
+    ca_base:
+      label: Coeficiente de Aproveitamento basico
+      value: 3.6
+      basis:
+        source: luos
+        ref: Art. 72, I
+      notes:
+      - O coeficiente de aproveitamento basico define o potencial construtivo permitido sem contrapartida
+        (art. 72, I da LC 1076/2026).
+      - Valor do coeficiente basico conforme o Anexo 2.8.3, fl. 3.
+    ca_max:
+      label: Coeficiente de Aproveitamento maximo
+      value: 6.5
+      basis: &id031
+        source: luos_anexo2
+        ref: Anexo 2.8.3, fl. 3
+      check:
+        type: ratio_max
+        numerator: total_built_area
+        denominator: lot_area
+        numerator_offset: area_isenta_ca
+    max_height:
+      label: Altura maxima da edificacao
+      value: 60
+      unit: m
+      basis: *id031
+      check:
+        type: lte
+        field: building_height
+    setback_front:
+      label: Recuo de jardim (afastamento frontal minimo)
+      value: 4
+      unit: m
+      basis: *id031
+      check:
+        type: gte
+        field: proposed_setback_front
+    setback_side_pct:
+      label: Afastamento lateral minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id031
+      check:
+        type: setback_from_height
+        field: proposed_setback_side
+        height_field: building_height
+        applies_above: 12.5
+    setback_back_pct:
+      label: Afastamento de fundo minimo (% da altura da edificacao)
+      value: 18
+      unit: '%'
+      basis: *id031
+      check:
+        type: setback_from_height
+        field: proposed_setback_back
+        height_field: building_height
+        applies_above: 12.5
+    min_permeable_pct:
+      label: Taxa de Permeabilidade minima
+      value: 10
+      unit: '%'
+      basis: *id031
+      check:
+        type: min_area_piecewise
+        field: permeable_area
+        base: lot_area
+        segments:
+        - up_to: 1500
+          pct: 10
+        - pct: 20
+      notes:
+      - Para terrenos com area superior a 1.500 m2, aplica-se 10% sobre os primeiros 1.500 m2 e 20% sobre
+        a area que exceder esse valor (nota de rodape do Anexo Anexo 2.8.3, fl. 3).
+    tp_factor_conversion:
+      label: Fator de conversao da Taxa de Permeabilidade
+      value: 50
+      unit: '%'
+      basis: *id031
+      notes:
+      - Percentual maximo da Taxa de Permeabilidade que pode ser convertido em medidas alternativas (nota
+        de rodape do Anexo).
+    lot_min_area:
+      label: Area minima do lote
+      value: 125
+      unit: m2
+      basis: *id031
+      notes:
+      - 75 m2 quando se tratar de Demanda Habitacional Prioritaria (nota de rodape).
+    lot_min_frontage:
+      label: Testada minima do lote
+      value: 5
+      unit: m
+      basis: *id031
+  group: ZOT 8.3 - Eixos Estrategicos
+rules:
+- code: tp-dispensa-lote-ate-150m2
+  title: Dispensa da taxa de permeabilidade em lote de ate 150 m2
+  message: 'Taxa de permeabilidade dispensada: terreno com matricula individual de area igual ou inferior
+    a 150 m2 (art. 79, III).'
+  severity: info
+  when:
+    lot_area:
+      lte: 150
+  effects:
+  - type: override_param
+    param: min_permeable_pct
+    value: 0
+    message: Taxa de permeabilidade dispensada (art. 79, III da LC 1076/2026).
+    basis:
+      source: luos
+      ref: Art. 79, III
+  basis:
+    source: luos
+    ref: Art. 79, III
+- code: tp-dispensa-centro-historico
+  title: Dispensa da taxa de permeabilidade no Centro Historico
+  message: Taxa de permeabilidade dispensada para terrenos localizados no Centro Historico (art. 79, IV).
+  severity: info
+  when:
+    centro_historico:
+      eq: true
+  effects:
+  - type: override_param
+    param: min_permeable_pct
+    value: 0
+    message: Taxa de permeabilidade dispensada (art. 79, IV da LC 1076/2026).
+    basis:
+      source: luos
+      ref: Art. 79, IV
+  basis:
+    source: luos
+    ref: Art. 79, IV
+- code: tp-dispensa-atividade-incompativel
+  title: Dispensa da taxa de permeabilidade por atividade incompativel
+  message: Taxa de permeabilidade dispensada para edificacoes destinadas a atividades incompativeis com
+    areas permeaveis (art. 79, II).
+  severity: info
+  when:
+    atividade_incompativel:
+      eq: true
+  effects:
+  - type: override_param
+    param: min_permeable_pct
+    value: 0
+    message: Taxa de permeabilidade dispensada (art. 79, II da LC 1076/2026).
+    basis:
+      source: luos
+      ref: Art. 79, II
+  basis:
+    source: luos
+    ref: Art. 79, II
+- code: tp-dispensa-ampliacao-area-edificada
+  title: Dispensa da taxa de permeabilidade em aumento sobre area edificada
+  message: Taxa de permeabilidade dispensada para aumento, reforma ou reciclagem de uso sobre area ja
+    edificada (art. 79, I).
+  severity: info
+  when:
+    ampliacao_area_edificada:
+      eq: true
+  effects:
+  - type: override_param
+    param: min_permeable_pct
+    value: 0
+    message: Taxa de permeabilidade dispensada (art. 79, I da LC 1076/2026).
+    basis:
+      source: luos
+      ref: Art. 79, I
+  basis:
+    source: luos
+    ref: Art. 79, I
+- code: zot14-his-regime-zot1
+  title: Regime urbanistico da ZOT 1 para HIS na ZOT 14
+  message: Adotavel o regime urbanistico da ZOT 1 na ZOT 14 para empreendimento destinado a Habitacao
+    de Interesse Social (art. 19, paragrafo 2).
+  severity: attention
+  when:
+    his:
+      eq: true
+  applies_to_zones:
+  - ZOT 14
+  effects:
+  - type: override_param
+    param: ca_base
+    value: 1.5
+    message: Coeficiente de aproveitamento basico da ZOT 1 (1,5) por conta do regime de HIS na ZOT 14
+      (art. 19, paragrafo 2).
+    basis:
+      source: luos
+      ref: Art. 19, paragrafo 2
+  - type: override_param
+    param: ca_max
+    value: 2.5
+    message: Coeficiente de aproveitamento maximo da ZOT 1 (2,5) por conta do regime de HIS na ZOT 14
+      (art. 19, paragrafo 2).
+    basis:
+      source: luos
+      ref: Art. 19, paragrafo 2
+  - type: add_requirement
+    title: Verificar os demais parametros conforme a ZOT 1
+    message: 'O regime de HIS adota o regime urbanistico da ZOT 1: altura maxima de 9 m, recuo de jardim
+      de 4 m, afastamentos laterais e de fundos isentos e taxa de permeabilidade de 30% (lotes de ate
+      1.500 m2) e 40% (area excedente). Alem disso, o imovel deve apresentar bens ambientais a preservar
+      em percentual minimo de 10% acima do previsto na legislacao especifica (art. 19, paragrafo 3).'
+    severity: attention
+    basis:
+      source: luos
+      ref: Art. 19, paragrafos 2 e 3
+  basis:
+    source: luos
+    ref: Art. 19, paragrafos 2 e 3
+- code: zot82-regime-especial-4d
+  title: Regime Especial +4D na ZOT 8.2
+  message: 'Regime Especial +4D: coeficiente de aproveitamento basico 7,5 e maximo 13, mediante atendimento
+    dos criterios e pontuacao minima do Anexo 2.8.2, fl. 3 (art. 74).'
+  severity: attention
+  when:
+    regime_4d:
+      eq: true
+  applies_to_zones:
+  - ZOT 8.2A
+  effects:
+  - type: override_param
+    param: ca_base
+    value: 7.5
+    message: Coeficiente de aproveitamento basico 7,5 no Regime Especial +4D (Anexo 2.8.2, nota 3).
+    basis:
+      source: luos_anexo2
+      ref: Anexo 2.8.2, nota 3
+  - type: override_param
+    param: ca_max
+    value: 13
+    message: Coeficiente de aproveitamento maximo 13 no Regime Especial +4D (Anexo 2.8.2, nota 4).
+    basis:
+      source: luos_anexo2
+      ref: Anexo 2.8.2, nota 4
+  - type: add_requirement
+    title: Anexar a pontuacao minima do Anexo 2.8.2
+    message: O Regime Especial +4D exige a pontuacao minima por faixa de area definida no Anexo 2.8.2,
+      fl. 3 (somatorio minimo de 15 pontos para terrenos de ate 200 m2, 20 pontos ate 500 m2, 30 pontos
+      ate 1.000 m2, 35 pontos ate 2.000 m2, 40 pontos ate 3.000 m2, 50 pontos ate 5.000 m2, 60 pontos
+      ate 10.000 m2, 80 pontos ate 30.000 m2 e 100 pontos acima de 30.000 m2). Para fins de determinacao
+      da area, exclui-se as areas isentas.
+    severity: attention
+    basis:
+      source: luos_anexo2
+      ref: Anexo 2.8.2, fl. 3
+  basis:
+    source: luos
+    ref: Art. 74
+- code: trazado-plano-diretor
+  title: Imovel atingido pelo trazado do Plano Diretor
+  message: 'Imovel atingido pelo trazado do Plano Diretor: o coeficiente de aproveitamento e a taxa de
+    permeabilidade sao calculados sobre a area remanescente do terreno, ou sobre a totalidade mediante
+    Transferencia do Direito de Construir (art. 26, I). Quando a ocupacao parcial ou total for inviabilizada
+    pelo trazado, a altura maxima fica limitada a 9 m (art. 26, II, b).'
+  severity: attention
+  when:
+    trazado_plano_diretor:
+      eq: true
+  effects:
+  - type: add_requirement
+    title: Conferir a base de calculo do coeficiente e da TP
+    message: Conferir a area remanescente e a eventual Transferencia do Direito de Construir antes de|Considerar
+      os limites de coeficiente de aproveitamento e de taxa de permeabilidade.
+    severity: attention
+    basis:
+      source: luos
+      ref: Art. 26
+  basis:
+    source: luos
+    ref: Art. 26
+- code: imovel-em-multiplas-zots
+  title: Imovel inserido em mais de uma ZOT
+  message: 'Imovel inserido em mais de uma ZOT: o regime urbanistico e determinado proporcionalmente a
+    area correspondente a cada ZOT, podendo ser adotados os padroes de regime de atividades e altura da
+    ZOT menos restritiva, exceto quando envolver a ZOT 15 ou a ZOT 16 (art. 24, paragrafo 3).'
+  severity: attention
+  when:
+    imovel_multiplas_zots:
+      eq: true
+  effects:
+  - type: add_requirement
+    title: Verificar a incidencia em mais de uma ZOT
+    message: Se o imovel estiver inserido em mais de uma ZOT, o regime e determinado proporcionalmente,
+      conforme o art. 24, paragrafo 3.
+    severity: attention
+    basis:
+      source: luos
+      ref: Art. 24, paragrafo 3
+  basis:
+    source: luos
+    ref: Art. 24, paragrafo 3
+- code: altura-acrescimo-rooftop
+  title: Acrescimo de altura para rooftop
+  message: A altura maxima pode ser acrescida de ate 4 m para areas de lazer, convilio ou paisagismo em
+    cobertura (rooftops), desde que a area construida do rooftop nao ultrapasse 40% da area do pavimento
+    imediatamente inferior e haja area vegetada minima de 25% (art. 81, paragrafo 2, I).
+  severity: info
+  when:
+    rooftop:
+      eq: true
+  effects:
+  - type: add_requirement
+    title: Verificar os requisitos do rooftop
+    message: Conferir os requisitos do art. 81, paragrafo 2, I antes de usar o acrescimo de 4 m na altura
+      maxima.
+    severity: attention
+    basis:
+      source: luos
+      ref: Art. 81, paragrafo 2, I
+  basis:
+    source: luos
+    ref: Art. 81, paragrafo 2, I
+- code: altura-acrescimo-bem-tombado
+  title: Acrescimo de altura para preservacao de bem tombado
+  message: A altura maxima pode ser acrescida de ate 9 m em projetos que promovam a preservacao de bem
+    tombado ou inventariado como de estruturao no proprio terreno, desde que nao situados nas ZOTs 1 e
+    2 (art. 81, paragrafo 2, II).
+  severity: info
+  when:
+    bem_tombado:
+      eq: true
+  effects:
+  - type: add_requirement
+    title: Verificar o acrescimo de altura
+    message: 'Conferir o art. 81, paragrafo 2, II: acrescimo de ate 9 m para preservacao de bem tombado
+      ou inventariado no proprio terreno, vedado nas ZOTs 1 e 2.'
+    severity: attention
+    basis:
+      source: luos
+      ref: Art. 81, paragrafo 2, II
+  basis:
+    source: luos
+    ref: Art. 81, paragrafo 2, II
+- code: isenca-fachada-ativa
+  title: Isenca de contabilizacao por fachada ativa
+  message: 'E isenta de contabilizacao no calculo do potencial construtivo a area do pavimento configurado
+    como fachada ativa, nos termos do art. 73, V e paragrafos 1 e 2 da LC 1076/2026: no minimo 50% da
+    extensao da fachada voltada ao espaco publico composta por portas, janelas ou elementos transparentes,
+    com no maximo um pavimento isento.'
+  severity: info
+  when:
+    area_isenta_ca:
+      gt: 0
+  effects:
+  - type: add_requirement
+    title: Conferir a fachada ativa
+    message: A area isenta deve ser informada no campo 'area construida isenta de contabilizacao no coeficiente
+      de aproveitamento'.
+    severity: info
+    basis:
+      source: luos
+      ref: Art. 73, V
+  basis:
+    source: luos
+    ref: Art. 73, V

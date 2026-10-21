@@ -70,12 +70,27 @@ async function loadCity(slug) {
   const first = el('option', null, '— selecione —');
   first.value = '';
   zoneSelect.appendChild(first);
+  // Zonas com sub-setores (grupo) sao agrupadas em <optgroup> para facilitar
+  // a selecao no mapa oficial.
+  const grupos = new Map();
   city.zones.forEach((z) => {
-    const opt = el('option', null, `${z.code} — ${z.name}`);
-    opt.value = z.code;
-    zoneSelect.appendChild(opt);
+    const chave = z.group || '';
+    if (!grupos.has(chave)) grupos.set(chave, []);
+    grupos.get(chave).push(z);
   });
-
+  grupos.forEach((lista, grupo) => {
+    let pai = zoneSelect;
+    if (grupo) {
+      pai = el('optgroup');
+      pai.label = grupo;
+      zoneSelect.appendChild(pai);
+    }
+    lista.forEach((z) => {
+      const opt = el('option', null, `${z.code} — ${z.name}`);
+      opt.value = z.code;
+      pai.appendChild(opt);
+    });
+  });
   const manual = city.zone_selection.method === 'manual';
   $('#zone-field').hidden = false;
   $('#zone-help').textContent = manual

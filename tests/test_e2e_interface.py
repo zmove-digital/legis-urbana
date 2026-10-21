@@ -168,3 +168,41 @@ def test_geolocalizacao_resolve_a_zona(pagina):
 
     texto = pagina.locator("#results").inner_text()
     assert "Zona Residencial" in texto, "a zona deveria ser resolvida por geolocalizacao"
+
+
+def test_zonas_de_porto_alegre_sao_agrupadas_por_sub_setor(pagina):
+    """As ZOTs 8.1, 8.2 e 8.3 ficam em grupos, com os sub-setores por letra."""
+    pagina.select_option("#city", "porto-alegre")
+    pagina.wait_for_timeout(700)
+
+    grupos = pagina.locator("#zone optgroup").all_text_contents()
+    assert any("8.1" in g for g in grupos), f"esperado grupo da ZOT 8.1 em {grupos}"
+    assert any("8.3" in g for g in grupos), f"esperado grupo da ZOT 8.3 em {grupos}"
+
+    opcoes = pagina.locator("#zone option").all_text_contents()
+    assert any("ZOT 8.1A" in o for o in opcoes)
+    assert any("ZOT 8.3D" in o for o in opcoes)
+
+
+def test_consulta_em_porto_alegre_cita_o_anexo_2(pagina):
+    pagina.select_option("#city", "porto-alegre")
+    pagina.wait_for_timeout(700)
+    pagina.select_option("#zone", "ZOT 4")
+    pagina.wait_for_timeout(200)
+
+    pagina.fill("#q-lot_area", "1200")
+    pagina.select_option("#q-use", "residencial")
+    pagina.fill("#q-total_built_area", "1800")
+    pagina.fill("#q-footprint_area", "400")
+    pagina.fill("#q-floors", "4")
+    pagina.fill("#q-permeable_area", "300")
+    pagina.fill("#q-proposed_setback_front", "4")
+    pagina.fill("#q-proposed_setback_side", "3")
+    pagina.fill("#q-proposed_setback_back", "3")
+    pagina.click("#btn-analyze")
+    pagina.wait_for_timeout(1500)
+
+    texto = pagina.locator("#results").inner_text()
+    assert "Coeficiente de Aproveitamento" in texto
+    assert "Anexo 2" in texto, "a base legal do Anexo 2 deve aparecer no resultado"
+    assert "ZOT 4" in texto

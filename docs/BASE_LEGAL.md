@@ -30,6 +30,7 @@ O texto da LUOS usado é o **compilado** pelo próprio município, que já
 incorpora as alterações até a Lei nº 18.177/2024 (publicada em 2024). Para uso
 em protocolo, confira a redação vigente na data.
 
+
 ### O que o Quadro 3 traz e o que ele traz só indiretamente
 
 O Quadro 3 é a fonte direta de: coeficiente de aproveitamento (máximo, base,
@@ -67,6 +68,89 @@ pontuação: a planilha oficial do Executivo (Quadros 3A/3B) depende de
 variáveis que o engenheiro precisa levantar no campo (declividade, visada,
 soleira, permeabilidade solo, etc.). A automatização desse cálculo é item do
 roadmap (N2), e depende de acesso à planilha vigente.
+
+## Porto Alegre (RS) — LC 1076/2026 e LC 1075/2026
+
+### Fontes
+
+| Chave | Documento | Onde consultar | Consolidação |
+|---|---|---|---|
+| `luos` | Lei Complementar nº 1.076/2026 — Parcelamento, uso e ocupação do solo (LUOS) | [legislacao.portoalegre.rs.gov.br](https://legislacao.portoalegre.rs.gov.br/norma/51486) | 2026-07-14 |
+| `luos_anexo2` | Anexo 2 da LC 1076/2026 — Quadros de regime urbanístico por ZOT (fls. 1 a 54) e Anexo 1 (mapa de zoneamento) | [PDF do anexo](https://legislacao.portoalegre.rs.gov.br/media/sapl/public/anexonormajuridica/2026/1420/lc1076a.pdf) | 2026-07-14 |
+| `pdus` | Lei Complementar nº 1.075/2026 — Plano Diretor Urbano Sustentável | [legislacao.portoalegre.rs.gov.br](https://legislacao.portoalegre.rs.gov.br/norma/51485) | — (fonte de referência) |
+
+O `pdus` é citada apenas como referência de macrozoneamento e de finalidades
+das ZOTs (art. 4 da LUOS); não fundamenta nenhum parâmetro numérico, e por
+isso não tem data de consolidação.
+
+A Lei nº 14.582/2026 (consultada em 21/10/2026) trata do calendário de
+eventos da cidade e **não** altera a LC 1076/2026.
+
+### Como o regime de Porto Alegre é diferente do de São Paulo
+
+Porto Alegre não usa taxa de ocupação. O regime de cada **Zona de Ordenamento
+Territorial (ZOT)** é composto por:
+
+| Parâmetro | Regra |
+|---|---|
+| Coeficiente de Aproveitamento | **Básico** (potencial sem contrapartida, art. 72, I) e **Máximo** (limite de conformidade) |
+| Altura máxima | por ZOT, com acréscimos do art. 81, §2º (rooftop e bem tombado) |
+| Afastamentos lateral e de fundo | **18% da altura** a partir da Referência de Nível, aplicável **acima de 12,5 m** (nota 6 do Anexo 2); 15% nos trechos com 20 m entre divisas paralelas (nota 7) |
+| Recuo de jardim | 4 m, ou 12 m em vias estruturantes ou arteriais (ZOTs 14 a 16) |
+| Taxa de Permeabilidade (TP) | em degraus: por exemplo, na ZOT 4, 20% sobre os primeiros 1.500 m² e 30% sobre o excedente |
+| Fator de conversão da TP | percentual máximo da TP convertível em medidas alternativas (nota de rodapé do Anexo) |
+
+As ZOTs 8.1, 8.2 e 8.3 têm **sub-setores** identificados por letra no desenho
+do Anexo 2 (fls. 2 e 3), o que leva a 29 zonas cadastradas a partir de 19
+ZOTs.
+
+### Regras condicionais convertidas
+
+| Artigo / nota | Regra convertida |
+|---|---|
+| Art. 24, §1º | Base de aplicação do regime é a menor poligonal do imóvel (título x local), com acréscimo de até 5% a critério do requerente |
+| Art. 24, §2º | Remembramento: aplicam-se os regimes de cada matrícula original |
+| Art. 24, §3º | Imóvel em mais de uma ZOT: regime proporcional à área de cada ZOT (exceção: ZOTs 15 e 16) |
+| Art. 24, §4º | CA das ZOTs 1 e 2: incide sobre toda a área (I), limitado ao Módulo de Fracionamento de 3.000 m² salvo parcelamento com equipamentos comunitários (II), reduzido em 50% em terreno de até 22.500 m² sem origem em parcelamento (III) |
+| Art. 24, §5º | CA de uso não residencial incide sobre toda a área do terreno |
+| Art. 26 | Traçado do Plano Diretor: cálculo sobre a área remanescente ou sobre a totalidade mediante TDC; na área atingida, altura limitada a 9 m |
+| Art. 19, §2º | HIS na ZOT 14 adota o regime urbanístico da ZOT 1 |
+| Art. 73 | Isenções de CA (garagem e circulações, residence unifamiliar, fachada ativa, entre outras) |
+| Art. 74 | Regime Especial +4D na ZOT 8.2: CA básico 7,5 e máximo 13, mediante pontuação mínima do Anexo 2.8.2, fl. 3 |
+| Art. 79 | Dispenas de TP: ampliação sobre área edificada, atividade incompatível, lote de até 150 m², Centro Histórico |
+| Art. 81, §2º | Acréscimos de altura: rooftop (4 m) e bem tombado (9 m) |
+| Art. 82 | Afastamentos laterais e de fundos = 18% da altura (15% em trechos com 20 m entre divisas) |
+| Art. 83 | Recuo de jardim |
+| Anexo 2, nota 6 | Afastamento de 18% da altura a partir da RN, aplicável acima de 12,5 m |
+
+### Interpretações registradas (não escondidas)
+
+Três pontos do texto não admitem valor único e foram tratados como
+**pendência ou nota**, nunca como valor escolhido em silêncio:
+
+1. **CA das ZOTs 1 e 2 (art. 24, §4º, III).** O texto reduz em 50% "o
+   coeficiente de aproveitamento" sem distinguir entre o básico e o máximo. A
+   redução foi aplicada a **ambos** (o básico não pode superar o máximo), e a
+   nota do parâmetro pede confirmação ao órgão competente. Sem a informação
+   sobre a origem do lote (parcelamento do solo aprovado pelo Município), o
+   valor fica **pendente** — o motor não escolhe entre 1,25 e 2,5 sozinho.
+2. **CA máximo das ZOTs 14, 15 e 16.** O Anexo 2 registra "Ajuste / TDC" em
+   vez de número: o limite é caso a caso, e o parâmetro fica como
+   **pendente**, com o texto do Anexo citado.
+3. **Altura do Sítio Histórico (ZOT 8.1 G).** O Anexo 2 registra "Órgão
+   Competente" (IPHAN/IPHAE): fica **pendente**, não estimado.
+
+Da mesma forma, o limite de 12,5 m para aplicação do afastamento de 18% vem da
+nota 6 do Anexo 2 e está reproduzido no `check` do parâmetro, com a nota de
+rodapé na íntegra.
+
+### Testes de snapshot
+
+`tests/test_porto_alegre.py` fixa os 29 quadros do Anexo 2 e as regras
+condicionais (redução de 50% do CA, base de cálculo limitada ao Módulo de
+Fracionamento, TP em degraus, afastamento de 18% da altura, dispensa de TP em
+lote de até 150 m², HIS na ZOT 14, +4D na ZOT 8.2). Qualquer alteração de valor
+no YAML quebra o teste e exige revisão explícita.
 
 ## Como o dado legal é versionado
 

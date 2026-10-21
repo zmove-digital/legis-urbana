@@ -44,6 +44,10 @@ link para o documento oficial.
 
 - **São Paulo (SP)** — Lei nº 16.402/2016 (LUOS), Anexo 3 / Quadro 3, texto compilado
   com as Leis nº 18.081/2024 e nº 18.177/2024. 39 zonas cadastradas, 18 regras condicionais.
+- **Porto Alegre (RS)** — Lei Complementar nº 1.076/2026 (LUOS) e Anexo 2 (quadros por
+  Zona de Ordenamento Territorial), com a LC nº 1.075/2026 (PDUS) como referência.
+  19 ZOTs e 29 zonas (com os sub-setores das ZOTs 8.1, 8.2 e 8.3), 11 regras condicionais.
+  A zona é identificada no mapa oficial (Anexo 1 da LC 1076/2026).
 - **Cidade Exemplo** — município fictício, usado para demonstração e testes automatizados
   (exercita resolução de zona por questionário, por geolocalização e a verificação de permeabilidade).
 
@@ -144,8 +148,13 @@ Nenhuma alteração de código é necessária: o motor é genérico.
   ART/RRT, parecer, análise do órgão nem a responsabilidade profissional.
 - **A zona precisa ser confirmada.** Sem o mapa oficial georreferenciado, em São Paulo
   a zona é informada manualmente pelo engenheiro (o app aponta o link do GeoSampa).
+  Em Porto Alegre a ZOT (e o eventual sub-setor) é lida no Anexo 1 da LC 1076/2026,
+  e o app aponta o link do anexo.
 - **Interpretação é humana.** Notas de rodapé do Quadro 3 e casos concretos do art. 66, II
   dependem de análise do órgão; o sistema sinaliza ("atenção") em vez de decidir.
+  Em Porto Alegre, os pontos ambíguos da LC 1076/2026 (CA das ZOTs 1 e 2, CA máximo
+  das ZOTs 14 a 16 e altura do Sítio Histórico) ficam **pendentes**, com o texto do
+  Anexo citado — nunca estimados.
 - **Vigência.** Os dados trazem a data de consolidação e a data de consulta da fonte;
   antes de protocolar, confira a redação vigente.
 - A Quota Ambiental (QA) de São Paulo exige a planilha oficial do Executivo —

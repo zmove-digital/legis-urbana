@@ -68,8 +68,18 @@ def build_facts(questions: list[Question], answers: dict[str, Any]) -> dict[str,
             facts[q.key] = value
 
     # Derivacoes: perguntas do tipo "derived" calculam fatos a partir de outros.
+    # Valor informado pelo responsavel tecnico tem precedencia sobre o calculado.
     for q in questions:
+        if q.type == "derived":
+            raw = answers.get(q.key)
+            if raw is not None and str(raw).strip() != "":
+                try:
+                    facts[q.key] = float(str(raw).replace(",", "."))
+                except (TypeError, ValueError):
+                    pass
         for derivation in q.derivations or []:
+            if derivation.get("fact") in facts:
+                continue
             derived = _apply_derivation(derivation, facts)
             if derived is not None:
                 facts[derivation["fact"]] = derived

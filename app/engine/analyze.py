@@ -19,8 +19,13 @@ PARAM_DISPLAY_KEYS = {
     "max_height": "Gabarito de altura maxima",
     "setback_front": "Recuo frontal minimo",
     "setback_side_back": "Recuo lateral e de fundo minimo",
+    "setback_side_pct": "Afastamento lateral minimo (% da altura)",
+    "setback_back_pct": "Afastamento de fundo minimo (% da altura)",
     "min_permeable_pct": "Area permeavel minima (% do lote)",
+    "tp_factor_conversion": "Fator de conversao da taxa de permeabilidade",
     "max_lot_area_per_unit": "Cota parte maxima de terreno por unidade",
+    "lot_min_area": "Area minima do lote",
+    "lot_min_frontage": "Testada minima do lote",
 }
 
 
@@ -152,16 +157,27 @@ def analyze(
                     notes = notes + [override["message"]]
 
             if value is None:
-                if info.get("pending_facts"):
+                manual = (param.check_spec or {}).get("type") == "manual"
+                if override is not None and override.get("message"):
+                    status = checks_engine.NAO_APLICAVEL
+                    message = override["message"]
+                elif info.get("pending_facts"):
                     status = checks_engine.PENDENTE
                     message = (
                         "Informe "
                         + ", ".join(info["pending_facts"])
                         + " para determinar este limite."
                     )
+                elif manual:
+                    status = checks_engine.PENDENTE
+                    message = notes[0] if notes else "Limite a definir caso a caso."
+                elif notes:
+                    status = checks_engine.NAO_APLICAVEL
+                    message = notes[0]
                 else:
                     status = checks_engine.NAO_APLICAVEL
                     message = "Não se aplica a esta zona."
+                limit_display = "A definir" if status == checks_engine.PENDENTE else "Não se aplica"
                 check_results.append(
                     {
                         "key": param.key,
@@ -169,7 +185,7 @@ def analyze(
                         "unit": param.unit,
                         "status": status,
                         "limit": None,
-                        "limit_display": "Não se aplica",
+                        "limit_display": limit_display,
                         "computed": None,
                         "computed_display": None,
                         "allowance": None,
@@ -183,7 +199,7 @@ def analyze(
                         "key": param.key,
                         "label": param.label,
                         "value": None,
-                        "value_display": "Não se aplica",
+                        "value_display": limit_display,
                         "unit": param.unit,
                         "basis": basis,
                         "notes": notes,

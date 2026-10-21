@@ -81,7 +81,7 @@ def test_zona_nao_definida_sem_respostas(db):
 # ------------------------------------------------------------------- API
 def test_api_lista_cidades(client):
     data = client.get("/api/cities").json()
-    assert {c["slug"] for c in data["items"]} == {"sao-paulo", "cidade-exemplo"}
+    assert {c["slug"] for c in data["items"]} == {"sao-paulo", "porto-alegre", "cidade-exemplo"}
 
 
 def test_api_detalhe_da_cidade(client):

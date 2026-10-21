@@ -82,8 +82,37 @@ zones:
 | `gte` | `field` ou `fields` | `campo ≥ valor` — recuos mínimos |
 | `lte` | `field` ou `fields` | `campo ≤ valor` — gabarito máximo |
 | `min_area_from_pct` | `field`, `base` | área mínima = `valor%` de `base` — permeabilidade |
+| `min_area_piecewise` | `field`, `segments` | área mínima em degraus (ver abaixo) |
+| `setback_from_height` | `field`, `height_field`, `applies_above` | afastamento = `valor%` da altura, quando a altura supera `applies_above` |
 | `max_area_per_unit` | `field`, `divisor` | `campo ≤ valor × divisor` — cota-parte |
+| `manual` | — | limite não numérico (case a caso): o parâmetro fica **pendente** com a nota do Anexo |
 | (ausente) | — | parâmetro apenas referencial (exibido, sem verificação) |
+
+### Ajustes do `ratio_max`
+
+| Campo | Efeito |
+|---|---|
+| `numerator_offset` | fato subtraído do numerador (áreas isentas de CA) |
+| `denominator_cap` | teto da base de cálculo (ex.: Módulo de Fracionamento) |
+| `denominator_cap_when` | condição em que o teto vale |
+| `denominator_cap_exempt_when` | condição em que o teto **não** vale (ex.: parcelamento com equipamentos comunitários) |
+
+### Permeabilidade em degraus
+
+```yaml
+min_permeable_pct:
+  value: 20
+  unit: "%"
+  check:
+    type: min_area_piecewise
+    field: permeable_area
+    base: lot_area
+    segments:
+      - {up_to: 1500, pct: 20}
+      - {pct: 30}
+```
+
+Lê-se: 20% sobre os primeiros 1.500 m² e 30% sobre o excedente do lote.
 
 ### Valores alternativos
 
@@ -147,12 +176,16 @@ questions:
 
   - key: building_height
     label: "Altura da edificação"
-    type: derived         # não aparece no formulário
+    type: derived         # calculada, mas pode ser informada
     derivations:
       - fact: building_height
         op: mul            # mul, div, add, sub, min, max
         args: [floors, floor_height]
 ```
+
+Uma pergunta `derived` pode ser **informada** pelo responsável técnico: o valor
+digitado tem precedência sobre o calculado (usado em Porto Alegre, em que a
+altura acima da Referência de Nível é a chave do afastamento de 18%).
 
 Nomes de campo livre, mas **consistentes** com os `numerator`/`denominator`/`field`
 dos `check` e com as condições das regras. Os fatos calculados
@@ -229,7 +262,8 @@ A geometria usa **GeoJSON padrão: [longitude, latitude]**.
 
 ## 8. Teste de snapshot para a nova cidade
 
-Copie `tests/test_sao_paulo.py` e adapte:
+Copie `tests/test_sao_paulo.py` (São Paulo) ou `tests/test_porto_alegre.py`
+(Porto Alegre) e adapte:
 
 ```python
 def test_quadro3_valores(db):
@@ -242,3 +276,18 @@ def test_quadro3_valores(db):
 
 Esse teste é o que impede que uma alteração de lei (ou um erro de digitação)
 passe despercebida.
+
+## 9. Quando a cidade tem muitos quadros: gerador de script
+
+Quando a legislação tem dezenas de zonas com a mesma estrutura (como os 29
+quadros do Anexo 2 de Porto Alegre), escrever o YAML à mão invites to error.
+O caminho usado foi um **script Python** que carrega a tabela transcrita do
+Anexo e emite o `city.yaml` — a transcrição fica em um único lugar
+(tabela), a estrutura sai sempre igual, e o YAML gerado é versionado como os
+outros.
+
+O script não fica no repositório (ele vive fora, junto do material de
+pesquisa), mas o YAML gerado é a fonte da verdade e é revisado no PR. Ao
+atualizar a lei: editar a tabela do script, regerar o YAML e conferir o
+diff — que deve mexer só nas linhas afetadas.
+

@@ -44,9 +44,9 @@ def _param(result, key):
 
 
 # --------------------------------------------------------------------- base
-def test_seed_carrega_duas_cidades(db):
+def test_seed_carrega_as_cidades_cadastradas(db):
     cities = db.query(City).all()
-    assert {c.slug for c in cities} == {"sao-paulo", "cidade-exemplo"}
+    assert {c.slug for c in cities} == {"sao-paulo", "porto-alegre", "cidade-exemplo"}
 
 
 def test_quadro3_zona_mista(db):
@@ -225,7 +225,7 @@ def test_todo_parametro_tem_base_legal(db):
         assert param.basis and param.basis.get("source") in chaves, param.key
 
 
-@pytest.mark.parametrize("slug", ["sao-paulo", "cidade-exemplo"])
+@pytest.mark.parametrize("slug", ["sao-paulo", "porto-alegre", "cidade-exemplo"])
 def test_integridade_da_base_legal(db, slug):
     """Toda cidade cadastrada precisa de base legal referenciavel."""
     cidade = db.query(City).filter(City.slug == slug).one()
@@ -249,7 +249,7 @@ def test_integridade_da_base_legal(db, slug):
             assert zona in zonas, f"{slug}: regra {regra.code} -> zona inexistente {zona}"
 
 
-@pytest.mark.parametrize("slug", ["sao-paulo", "cidade-exemplo"])
+@pytest.mark.parametrize("slug", ["sao-paulo", "porto-alegre", "cidade-exemplo"])
 def test_nenhuma_fonte_sem_url_e_titulo(db, slug):
     cidade = db.query(City).filter(City.slug == slug).one()
     for fonte in db.query(Source).filter(Source.city_id == cidade.id).all():
@@ -263,7 +263,7 @@ def test_nenhuma_fonte_sem_url_e_titulo(db, slug):
             assert not fonte.url, "cidade de demonstracao nao deve ter link oficial"
 
 
-@pytest.mark.parametrize("slug", ["sao-paulo", "cidade-exemplo"])
+@pytest.mark.parametrize("slug", ["sao-paulo", "porto-alegre", "cidade-exemplo"])
 def test_fonte_usada_como_base_tem_vigencia(db, slug):
     """Toda fonte que fundamenta um numero precisa de data de consolidacao.
 
