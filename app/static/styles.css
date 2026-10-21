@@ -20,6 +20,11 @@
 
 * { box-sizing: border-box; }
 
+/* O atributo `hidden` precisa vencer as regras de `display` das classes
+   (por exemplo .modal { display: grid }): sem isso, o modal e o link de
+   ajuda aparecem sempre e o botao "Fechar" nao tem efeito visual. */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   background: var(--bg);

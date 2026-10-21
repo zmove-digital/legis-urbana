@@ -89,8 +89,15 @@ async function loadCity(slug) {
     helper.hidden = true;
   }
 
-  const hasGeo = city.questions.some((q) => q.key === 'lat');
-  $('#geo-field').hidden = !hasGeo;
+  // A resolucao por geolocalizacao usa o bloco dedicado de lat/lon. Quando a
+  // cidade ja traz lat/lon como perguntas do questionario, o bloco e omitido
+  // para nao duplicar o mesmo campo na tela.
+  const temGeoNoQuestionario = city.questions.some((q) => q.key === 'lat' || q.key === 'lon');
+  const querGeo =
+    city.zone_selection.method === 'geo' ||
+    city.zone_selection.method === 'questionnaire' ||
+    temGeoNoQuestionario;
+  $('#geo-field').hidden = !(querGeo && !temGeoNoQuestionario);
 
   renderQuestions();
   clearResults();
@@ -157,6 +164,14 @@ function collectAnswers() {
       answers[q.key] = q.type === 'number' ? Number(node.value) : node.value;
     }
   });
+
+  // Bloco dedicado de geolocalizacao (usado quando a cidade nao traz
+  // lat/lon como perguntas do questionario).
+  const lat = document.getElementById('lat');
+  const lon = document.getElementById('lon');
+  if (lat && lat.value !== '') answers.lat = Number(lat.value);
+  if (lon && lon.value !== '') answers.lon = Number(lon.value);
+
   return answers;
 }
 

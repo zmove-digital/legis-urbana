@@ -84,15 +84,25 @@ Variáveis de ambiente (`cp .env.example .env`):
 ## Testes e lint
 
 ```bash
-pytest          # 39 testes: motor, dados legais e API
-ruff check .    # lint
-ruff format .   # formatação
+pytest -m "not e2e"   # 44 testes: motor, dados legais, API e interface
+pytest -m e2e         # 5 testes de ponta a ponta em navegador (Playwright)
+ruff check .          # lint
+ruff format .         # formatação
 ```
 
 Os testes incluem **snapshots do Quadro 3** (CA/TO/gabarito/recuos de ZM, ZC, ZPR,
 ZPI-2, ZEPAM, AC-2…), a alternância de TO por área do lote, o CA reduzido das ZEIS
 (notas f/g/h), as dispensas do art. 66 e as exigências de QA dos arts. 76/81.
 Se a lei mudar, esses testes acusam — de propósito.
+
+Os testes `e2e` sobem a aplicação e a abrem num Chromium de verdade, para
+verificar o que os testes de API não enxergam: modal que abre sozinho, campo
+que não é lido, botão que não fecha nada. Precisam do Playwright:
+
+```bash
+pip install playwright
+playwright install chromium
+```
 
 ## Estrutura
 
