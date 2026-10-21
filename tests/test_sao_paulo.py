@@ -226,7 +226,63 @@ def test_todo_parametro_tem_base_legal(db):
 
 
 @pytest.mark.parametrize("slug", ["sao-paulo", "cidade-exemplo"])
+def test_integridade_da_base_legal(db, slug):
+    """Toda cidade cadastrada precisa de base legal referenciavel."""
+    cidade = db.query(City).filter(City.slug == slug).one()
+    chaves = {s.key for s in db.query(Source).filter(Source.city_id == cidade.id).all()}
+
+    for param in db.query(Parameter).filter(Parameter.city_id == cidade.id).all():
+        assert param.basis, f"{slug}: parametro {param.key} sem base legal"
+        assert param.basis.get("source") in chaves, f"{slug}: {param.key} -> fonte inexistente"
+        assert param.basis.get("ref"), f"{slug}: {param.key} sem referencia localizavel"
+
+    for regra in db.query(Rule).filter(Rule.city_id == cidade.id).all():
+        assert regra.basis, f"{slug}: regra {regra.code} sem base legal"
+        assert regra.basis.get("source") in chaves, f"{slug}: {regra.code} -> fonte inexistente"
+
+    # Nenhuma regra pode apontar para zona inexistente
+    zonas = {z.code for z in db.query(Zone).filter(Zone.city_id == cidade.id).all()}
+    for regra in db.query(Rule).filter(Rule.city_id == cidade.id).all():
+        for zona in regra.applies_to_zones or []:
+            assert zona in zonas, f"{slug}: regra {regra.code} -> zona inexistente {zona}"
+        for zona in regra.exclude_zones or []:
+            assert zona in zonas, f"{slug}: regra {regra.code} -> zona inexistente {zona}"
+
+
+@pytest.mark.parametrize("slug", ["sao-paulo", "cidade-exemplo"])
 def test_nenhuma_fonte_sem_url_e_titulo(db, slug):
     cidade = db.query(City).filter(City.slug == slug).one()
     for fonte in db.query(Source).filter(Source.city_id == cidade.id).all():
         assert fonte.title
+        assert fonte.notes
+        if not cidade.is_demo:
+            # Cidades reais exigem link oficial e data de consolidacao
+            assert fonte.url and fonte.url.startswith("https://"), fonte.key
+        else:
+            # Cidades ficticias sao marcadas como demonstracao
+            assert not fonte.url, "cidade de demonstracao nao deve ter link oficial"
+
+
+@pytest.mark.parametrize("slug", ["sao-paulo", "cidade-exemplo"])
+def test_fonte_usada_como_base_tem_vigencia(db, slug):
+    """Toda fonte que fundamenta um numero precisa de data de consolidacao.
+
+    Fontes apenas de referencia (citadas em notas, sem fundamentar parametro)
+    podem existir sem data, mas precisam dizer isso.
+    """
+    cidade = db.query(City).filter(City.slug == slug).one()
+    usadas = set()
+    for param in db.query(Parameter).filter(Parameter.city_id == cidade.id).all():
+        if param.basis:
+            usadas.add(param.basis.get("source"))
+    for regra in db.query(Rule).filter(Rule.city_id == cidade.id).all():
+        if regra.basis:
+            usadas.add(regra.basis.get("source"))
+
+    for fonte in db.query(Source).filter(Source.city_id == cidade.id).all():
+        if fonte.key in usadas:
+            assert fonte.consolidated_as_of, f"{slug}: fonte {fonte.key} sem consolidacao"
+        else:
+            assert "refer" in (fonte.notes or "").lower(), (
+                f"{slug}: fonte {fonte.key} sem data de consolidacao e sem nota de referencia"
+            )

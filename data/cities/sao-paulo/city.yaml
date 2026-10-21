@@ -47,7 +47,9 @@ sources:
     title: "Lei nº 16.050/2014 — Plano Diretor Estratégico (PDE)"
     url: "https://legislacao.prefeitura.sp.gov.br/lei-16050-de-31-de-julho-de-2014"
     retrieved_at: "2026-10-21"
-    notes: "Referenciada pela LUOS (arts. 8º, 83, 111, 112, 275, 362 e 363)."
+    notes: >-
+      Fonte de referência, citada em notas de rodape do Quadro 3 (arts. 8º, 83, 111, 112,
+      275, 362 e 363 da LUOS). Não fundamenta nenhum parâmetro numérico deste cadastro.
 
 # ---------------------------------------------------------------------------
 # Modelos de parâmetro (evita repetição; podem ser sobrescritos por zona)

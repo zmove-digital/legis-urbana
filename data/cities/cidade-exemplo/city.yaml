@@ -34,8 +34,11 @@ sources:
     kind: norma
     title: "Plano Diretor fictício da Cidade Exemplo"
     url: null
+    consolidated_as_of: "2026-10-21"
     retrieved_at: "2026-10-21"
-    notes: "Documento fictício, criado apenas para demonstração e testes automatizados."
+    notes: >-
+      Documento fictício, criado apenas para demonstração e testes automatizados.
+      Os números não correspondem a nenhuma legislação real.
 
 x-modelos:
   ca_min: &ca_min
